@@ -1,0 +1,19 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<Nullable>enable</Nullable>
+		<UseWindowsForms>true</UseWindowsForms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<ApplicationIcon>icon_color.ico</ApplicationIcon>
+		<AssemblyName>LoL Auto Accepter</AssemblyName>
+		<StartupObject>LoL_AutoAccept.Program</StartupObject>
+		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Content Include="icon_color.ico" />
+	</ItemGroup>
+
+</Project>
