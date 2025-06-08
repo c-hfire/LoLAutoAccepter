@@ -1,4 +1,3 @@
-using System.Net.Http;
 using System.Text.Json;
 
 namespace LoL_AutoAccept
@@ -12,8 +11,6 @@ namespace LoL_AutoAccept
         private readonly string AppName = "LoL_Auto_Accepter";
         // 自動承諾機能の有効/無効フラグ
         private bool isAutoAcceptEnabled = true;
-        // 自動承諾用のキャンセルトークン
-        private CancellationTokenSource autoAcceptCts = new();
         // 設定情報
         private AppConfig config = new();
         // Lockfile監視用
@@ -42,8 +39,6 @@ namespace LoL_AutoAccept
 
             isAutoAcceptEnabled = config.AutoAcceptEnabled;
             toggleAutoAcceptToolStripMenuItem.Checked = isAutoAcceptEnabled;
-            UpdateDelayMenuCheckmarks(config.AcceptDelaySeconds);
-            startupToolStripMenuItem.Checked = StartupManager.IsStartupEnabled(AppName);
 
             Logger.Write("LoL Auto Accepter 起動完了");
 
@@ -126,98 +121,22 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 通知アイコンのダブルクリックでウィンドウ表示
         /// </summary>
-        private void NotifyIcon1_DoubleClick(object sender, EventArgs e)
+        private void NotifyIcon1_DoubleClick(object sender, MouseEventArgs e)
         {
-            Visible = true;
-            ShowInTaskbar = true;
-            WindowState = FormWindowState.Normal;
-        }
-
-        /// <summary>
-        /// 承諾ディレイ秒数を設定
-        /// </summary>
-        private void SetDelay(int seconds)
-        {
-            config.AcceptDelaySeconds = seconds;
-            config.Save();
-            UpdateDelayMenuCheckmarks(seconds);
-        }
-
-        /// <summary>
-        /// ディレイ選択メニューのチェック状態を更新
-        /// </summary>
-        private void UpdateDelayMenuCheckmarks(int selected)
-        {
-            delay0ToolStripMenuItem.Checked = (selected == 0);
-            delay2ToolStripMenuItem.Checked = (selected == 2);
-            delay5ToolStripMenuItem.Checked = (selected == 5);
-            delay10ToolStripMenuItem.Checked = (selected == 10);
-        }
-
-        // 各ディレイメニュークリック時の処理
-        private void Delay0ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetDelay(0);
-            Logger.Write("ディレイを0秒に設定");
-        }
-
-        private void Delay2ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetDelay(2);
-            Logger.Write("ディレイを2秒に設定");
-        }
-
-        private void Delay5ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetDelay(5);
-            Logger.Write("ディレイを5秒に設定");
-        }
-
-        private void Delay10ToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            SetDelay(10);
-            Logger.Write("ディレイを10秒に設定");
-        }
-
-        /// <summary>
-        /// スタートアップ有効/無効切り替え
-        /// </summary>
-        private void StartupToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            bool willEnable = !startupToolStripMenuItem.Checked;
-
-            StartupManager.SetStartupEnabled(willEnable, AppName, Application.ExecutablePath);
-            startupToolStripMenuItem.Checked = willEnable;
-
-            config.StartWithWindows = willEnable;
-            config.Save();
-
-            Logger.Write($"スタートアップ起動を {(willEnable ? "有効化" : "無効化")} しました。");
-        }
-
-        /// <summary>
-        /// 設定フォルダをエクスプローラーで開く
-        /// </summary>
-        private void OpenConfigFolderToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
+            using var dlg = new SettingsForm(config);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                string folderPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "LAA");
-
-                if (Directory.Exists(folderPath))
-                {
-                    System.Diagnostics.Process.Start("explorer.exe", folderPath);
-                }
-            }
-            catch (Exception ex)
-            {
-                Logger.Write($"設定フォルダのオープンに失敗: {ex.Message}");
+                // 設定反映
+                config.Save();
+                Logger.Write("設定を保存しました。");
+                isAutoAcceptEnabled = config.AutoAcceptEnabled;
+                StopWatcher();
+                if (isAutoAcceptEnabled)
+                    StartWatcher();
             }
         }
 
-        private async Task CheckForUpdateAsync()
+        private static async Task CheckForUpdateAsync()
         {
             try
             {
@@ -244,7 +163,7 @@ namespace LoL_AutoAccept
         }
 
         // バージョン比較
-        private bool IsNewerVersion(string latest, string current)
+        private static bool IsNewerVersion(string latest, string current)
         {
             string l = latest.TrimStart('v', 'V');
             string c = current.TrimStart('v', 'V');
@@ -256,7 +175,7 @@ namespace LoL_AutoAccept
         }
 
         // アップデート通知（タスクトレイバルーン or メッセージボックス等）
-        private void ShowUpdateNotification(string latestTag, string? url)
+        private static void ShowUpdateNotification(string latestTag, string? url)
         {
             string msg = $"新しいバージョン {latestTag} が利用可能です。ダウンロードしますか？";
             if (MessageBox.Show(msg, "アップデート通知", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
@@ -269,6 +188,22 @@ namespace LoL_AutoAccept
                         UseShellExecute = true
                     });
                 }
+            }
+        }
+
+
+        private void SettingsStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using var dlg = new SettingsForm(config);
+            if (dlg.ShowDialog(this) == DialogResult.OK)
+            {
+                // 設定反映
+                config.Save();
+                Logger.Write("設定を保存しました。");
+                isAutoAcceptEnabled = config.AutoAcceptEnabled;
+                StopWatcher();
+                if (isAutoAcceptEnabled)
+                    StartWatcher();
             }
         }
     }
