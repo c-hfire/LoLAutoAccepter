@@ -11,24 +11,33 @@ namespace LoL_AutoAccept
         {
             InitializeComponent();
             this.config = config;
+            LoadConfigToUI();
+        }
 
-            // 初期値をUIに反映
+        private void LoadConfigToUI()
+        {
             checkBoxAutoAccept.Checked = config.AutoAcceptEnabled;
             numericUpDownDelay.Value = config.AcceptDelaySeconds;
             checkBoxStartup.Checked = config.StartWithWindows;
             textBoxLoLDir.Text = config.LeagueOfLegendsDirectory;
         }
 
-        private void ButtonOK_Click(object sender, EventArgs e)
+        private void SaveUIToConfig()
         {
-            // UIの値を設定に反映
             config.AutoAcceptEnabled = checkBoxAutoAccept.Checked;
             config.AcceptDelaySeconds = (int)numericUpDownDelay.Value;
             config.StartWithWindows = checkBoxStartup.Checked;
             config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
             config.Save();
+        }
 
-            // スタートアップ設定を反映
+        private static string ConfigFolderPath =>
+            Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
+
+        private void ButtonOK_Click(object sender, EventArgs e)
+        {
+            SaveUIToConfig();
+
             StartupManager.SetStartupEnabled(
                 config.StartWithWindows,
                 "LoL_Auto_Accepter",
@@ -47,8 +56,10 @@ namespace LoL_AutoAccept
 
         private void ButtonBrowse_Click(object sender, EventArgs e)
         {
-            using var fbd = new FolderBrowserDialog();
-            fbd.SelectedPath = textBoxLoLDir.Text;
+            using var fbd = new FolderBrowserDialog
+            {
+                SelectedPath = textBoxLoLDir.Text
+            };
             if (fbd.ShowDialog() == DialogResult.OK)
             {
                 textBoxLoLDir.Text = fbd.SelectedPath;
@@ -59,13 +70,9 @@ namespace LoL_AutoAccept
         {
             try
             {
-                string folderPath = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                    "LAA");
-
-                if (Directory.Exists(folderPath))
+                if (Directory.Exists(ConfigFolderPath))
                 {
-                    System.Diagnostics.Process.Start("explorer.exe", folderPath);
+                    System.Diagnostics.Process.Start("explorer.exe", ConfigFolderPath);
                 }
                 else
                 {

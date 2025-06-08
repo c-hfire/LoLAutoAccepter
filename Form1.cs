@@ -33,8 +33,7 @@ namespace LoL_AutoAccept
         private void Form1_Load(object sender, EventArgs e)
         {
             config = AppConfig.Load();
-            bool actualStartup = StartupManager.IsStartupEnabled(AppName);
-            config.StartWithWindows = actualStartup;
+            config.StartWithWindows = StartupManager.IsStartupEnabled(AppName);
             config.Save();
 
             isAutoAcceptEnabled = config.AutoAcceptEnabled;
@@ -43,9 +42,7 @@ namespace LoL_AutoAccept
             Logger.Write("LoL Auto Accepter 起動完了");
 
             if (isAutoAcceptEnabled)
-            {
                 StartWatcher();
-            }
         }
 
         /// <summary>
@@ -53,9 +50,7 @@ namespace LoL_AutoAccept
         /// </summary>
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            config.AutoAcceptEnabled = isAutoAcceptEnabled;
-            config.Save();
-            StopWatcher();
+            SaveConfigAndWatcher();
         }
 
         /// <summary>
@@ -65,17 +60,9 @@ namespace LoL_AutoAccept
         {
             isAutoAcceptEnabled = !isAutoAcceptEnabled;
             toggleAutoAcceptToolStripMenuItem.Checked = isAutoAcceptEnabled;
-
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
-            config.Save();
-
             Logger.Write($"自動承諾を {(isAutoAcceptEnabled ? "ON" : "OFF")} に切り替えました。");
-            StopWatcher();
-
-            if (isAutoAcceptEnabled)
-            {
-                StartWatcher();
-            }
+            SaveConfigAndWatcher();
         }
 
         /// <summary>
@@ -94,6 +81,15 @@ namespace LoL_AutoAccept
         {
             lockfileWatcher?.Stop();
             lockfileWatcher = null;
+        }
+
+        private void SaveConfigAndWatcher()
+        {
+            config.AutoAcceptEnabled = isAutoAcceptEnabled;
+            config.Save();
+            StopWatcher();
+            if (isAutoAcceptEnabled)
+                StartWatcher();
         }
 
         /// <summary>
@@ -123,16 +119,22 @@ namespace LoL_AutoAccept
         /// </summary>
         private void NotifyIcon1_DoubleClick(object sender, MouseEventArgs e)
         {
+            ShowSettingsDialog();
+        }
+
+        private void SettingsStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ShowSettingsDialog();
+        }
+
+        private void ShowSettingsDialog()
+        {
             using var dlg = new SettingsForm(config);
             if (dlg.ShowDialog(this) == DialogResult.OK)
             {
-                // 設定反映
-                config.Save();
                 Logger.Write("設定を保存しました。");
                 isAutoAcceptEnabled = config.AutoAcceptEnabled;
-                StopWatcher();
-                if (isAutoAcceptEnabled)
-                    StartWatcher();
+                SaveConfigAndWatcher();
             }
         }
 
@@ -188,21 +190,6 @@ namespace LoL_AutoAccept
                         UseShellExecute = true
                     });
                 }
-            }
-        }
-
-        private void SettingsStripMenuItem_Click(object sender, EventArgs e)
-        {
-            using var dlg = new SettingsForm(config);
-            if (dlg.ShowDialog(this) == DialogResult.OK)
-            {
-                // 設定反映
-                config.Save();
-                Logger.Write("設定を保存しました。");
-                isAutoAcceptEnabled = config.AutoAcceptEnabled;
-                StopWatcher();
-                if (isAutoAcceptEnabled)
-                    StartWatcher();
             }
         }
     }

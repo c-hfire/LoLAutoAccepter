@@ -24,13 +24,9 @@ public static class StartupManager
         }
 
         if (enabled)
-        {
             key.SetValue(appName, exePath);
-        }
         else
-        {
             key.DeleteValue(appName, false);
-        }
     }
 
     /// <summary>

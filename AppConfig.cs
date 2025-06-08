@@ -15,11 +15,11 @@ public class AppConfig
     public string LeagueOfLegendsDirectory { get; set; } = @"C:\Riot Games\League of Legends";
 
     // 設定ファイル保存ディレクトリ
-    private static readonly string ConfigDir =
+    private static string ConfigDir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
 
     // 設定ファイルパス
-    private static readonly string ConfigPath = Path.Combine(ConfigDir, "config.json");
+    private static string ConfigPath => Path.Combine(ConfigDir, "config.json");
 
     /// <summary>
     /// 設定ファイルを読み込みます。失敗時はデフォルト値を返します。
@@ -49,9 +49,7 @@ public class AppConfig
     {
         try
         {
-            if (!Directory.Exists(ConfigDir))
-                Directory.CreateDirectory(ConfigDir);
-
+            EnsureConfigDirectory();
             string json = JsonSerializer.Serialize(this, new JsonSerializerOptions { WriteIndented = true });
             File.WriteAllText(ConfigPath, json);
         }
@@ -59,5 +57,14 @@ public class AppConfig
         {
             Logger.Write("設定ファイルの保存エラー: " + ex.Message);
         }
+    }
+
+    /// <summary>
+    /// 設定ファイル保存ディレクトリを確認し、存在しない場合は作成します。
+    /// </summary>
+    private static void EnsureConfigDirectory()
+    {
+        if (!Directory.Exists(ConfigDir))
+            Directory.CreateDirectory(ConfigDir);
     }
 }
