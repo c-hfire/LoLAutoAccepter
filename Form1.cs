@@ -1,3 +1,6 @@
+using System.Net.Http;
+using System.Text.Json;
+
 namespace LoL_AutoAccept
 {
     /// <summary>
@@ -15,6 +18,9 @@ namespace LoL_AutoAccept
         private AppConfig config = new();
         // Lockfile監視用
         private LockfileWatcher? lockfileWatcher;
+
+        private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
+        private const string CurrentVersion = "1.0.2";
 
         /// <summary>
         /// フォーム初期化
@@ -106,12 +112,15 @@ namespace LoL_AutoAccept
         /// <summary>
         /// フォームを最小化・タスクバー非表示で起動
         /// </summary>
-        protected override void OnLoad(EventArgs e)
+        protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
             WindowState = FormWindowState.Minimized;
             ShowInTaskbar = false;
             Visible = false;
+
+            // 起動時にアップデートチェック
+            await CheckForUpdateAsync();
         }
 
         /// <summary>
@@ -205,6 +214,61 @@ namespace LoL_AutoAccept
             catch (Exception ex)
             {
                 Logger.Write($"設定フォルダのオープンに失敗: {ex.Message}");
+            }
+        }
+
+        private async Task CheckForUpdateAsync()
+        {
+            try
+            {
+                using var client = new HttpClient();
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("LoLAutoAccepter-Updater");
+
+                var response = await client.GetAsync(GitHubReleasesApiUrl);
+                response.EnsureSuccessStatusCode();
+
+                var json = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(json);
+                var latestTag = doc.RootElement.GetProperty("tag_name").GetString();
+
+                if (!string.IsNullOrEmpty(latestTag) && IsNewerVersion(latestTag, CurrentVersion))
+                {
+                    var htmlUrl = doc.RootElement.GetProperty("html_url").GetString();
+                    ShowUpdateNotification(latestTag, htmlUrl);
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Write("アップデートチェック失敗: " + ex.Message);
+            }
+        }
+
+        // バージョン比較
+        private bool IsNewerVersion(string latest, string current)
+        {
+            string l = latest.TrimStart('v', 'V');
+            string c = current.TrimStart('v', 'V');
+            if (Version.TryParse(l, out var latestVer) && Version.TryParse(c, out var currentVer))
+            {
+                return latestVer > currentVer;
+            }
+            return false;
+        }
+
+        // アップデート通知（タスクトレイバルーン or メッセージボックス等）
+        private void ShowUpdateNotification(string latestTag, string? url)
+        {
+            string msg = $"新しいバージョン {latestTag} が利用可能です。ダウンロードしますか？";
+            if (MessageBox.Show(msg, "アップデート通知", MessageBoxButtons.YesNo, MessageBoxIcon.Information) == DialogResult.Yes)
+            {
+                if (!string.IsNullOrEmpty(url))
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = url,
+                        UseShellExecute = true
+                    });
+                }
             }
         }
     }
