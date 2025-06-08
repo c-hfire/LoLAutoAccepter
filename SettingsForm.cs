@@ -1,6 +1,3 @@
-using System.Windows.Forms;
-using System.IO;
-
 namespace LoL_AutoAccept
 {
     /// <summary>

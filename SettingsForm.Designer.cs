@@ -47,7 +47,7 @@ namespace LoL_AutoAccept
             // 
             // numericUpDownDelay
             // 
-            numericUpDownDelay.Location = new Point(120, 53);
+            numericUpDownDelay.Location = new Point(128, 53);
             numericUpDownDelay.Maximum = new decimal(new int[] { 30, 0, 0, 0 });
             numericUpDownDelay.Name = "numericUpDownDelay";
             numericUpDownDelay.Size = new Size(60, 23);
@@ -80,7 +80,7 @@ namespace LoL_AutoAccept
             // 
             // buttonOK
             // 
-            buttonOK.Location = new Point(80, 200);
+            buttonOK.Location = new Point(80, 209);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(75, 23);
             buttonOK.TabIndex = 7;
@@ -89,7 +89,7 @@ namespace LoL_AutoAccept
             // 
             // buttonCancel
             // 
-            buttonCancel.Location = new Point(180, 200);
+            buttonCancel.Location = new Point(180, 209);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(75, 23);
             buttonCancel.TabIndex = 8;
@@ -117,9 +117,11 @@ namespace LoL_AutoAccept
             // buttonOpenConfigFolder
             // 
             buttonOpenConfigFolder.Location = new Point(20, 180);
+            buttonOpenConfigFolder.Name = "buttonOpenConfigFolder";
             buttonOpenConfigFolder.Size = new Size(120, 23);
+            buttonOpenConfigFolder.TabIndex = 9;
             buttonOpenConfigFolder.Text = "設定フォルダを開く";
-            buttonOpenConfigFolder.Click += new System.EventHandler(this.ButtonOpenConfigFolder_Click);
+            buttonOpenConfigFolder.Click += ButtonOpenConfigFolder_Click;
             // 
             // SettingsForm
             // 

@@ -191,7 +191,6 @@ namespace LoL_AutoAccept
             }
         }
 
-
         private void SettingsStripMenuItem_Click(object sender, EventArgs e)
         {
             using var dlg = new SettingsForm(config);
