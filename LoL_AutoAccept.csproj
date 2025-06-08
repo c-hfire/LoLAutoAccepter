@@ -7,7 +7,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<ApplicationIcon>icon_color.ico</ApplicationIcon>
-		<AssemblyName>LoL Auto Accepter</AssemblyName>
+		<AssemblyName>LoLAutoAccepter</AssemblyName>
 		<StartupObject>LoL_AutoAccept.Program</StartupObject>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	</PropertyGroup>
