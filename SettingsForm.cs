@@ -20,6 +20,7 @@ namespace LoL_AutoAccept
             numericUpDownDelay.Value = config.AcceptDelaySeconds;
             checkBoxStartup.Checked = config.StartWithWindows;
             textBoxLoLDir.Text = config.LeagueOfLegendsDirectory;
+            checkBoxAutoClose.Checked = config.AutoCloseOnAccept;
         }
 
         private void SaveUIToConfig()
@@ -28,6 +29,7 @@ namespace LoL_AutoAccept
             config.AcceptDelaySeconds = (int)numericUpDownDelay.Value;
             config.StartWithWindows = checkBoxStartup.Checked;
             config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
+            config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
             config.Save();
         }
 

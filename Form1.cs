@@ -17,7 +17,7 @@ namespace LoL_AutoAccept
         private LockfileWatcher? lockfileWatcher;
 
         private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
-        private const string CurrentVersion = "1.0.2";
+        private const string CurrentVersion = "1.0.3";
 
         /// <summary>
         /// ƒtƒH[ƒ€‰Šú‰»

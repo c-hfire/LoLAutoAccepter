@@ -119,6 +119,13 @@ public static class AutoAccepter
                         await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
                         Logger.Write("マッチ承諾を送信しました。");
                         accepted = true;
+
+                        // 承諾後にアプリ自動終了
+                        if (config.AutoCloseOnAccept)
+                        {
+                            Logger.Write("設定によりアプリを自動終了します。");
+                            Application.Exit();
+                        }
                     }
                 }
                 else

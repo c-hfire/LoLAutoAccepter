@@ -13,6 +13,7 @@ namespace LoL_AutoAccept
         private Label labelDelay;
         private Label labelLoLDir;
         private Button buttonOpenConfigFolder;
+        private CheckBox checkBoxAutoClose;
 
         protected override void Dispose(bool disposing)
         {
@@ -33,6 +34,7 @@ namespace LoL_AutoAccept
             labelDelay = new Label();
             labelLoLDir = new Label();
             buttonOpenConfigFolder = new Button();
+            checkBoxAutoClose = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDelay).BeginInit();
             SuspendLayout();
             // 
@@ -62,39 +64,15 @@ namespace LoL_AutoAccept
             checkBoxStartup.TabIndex = 3;
             checkBoxStartup.Text = "Windows起動時に自動起動";
             // 
-            // textBoxLoLDir
+            // checkBoxAutoClose
             // 
-            textBoxLoLDir.Location = new Point(20, 150);
-            textBoxLoLDir.Name = "textBoxLoLDir";
-            textBoxLoLDir.Size = new Size(250, 23);
-            textBoxLoLDir.TabIndex = 5;
-            // 
-            // buttonBrowse
-            // 
-            buttonBrowse.Location = new Point(280, 150);
-            buttonBrowse.Name = "buttonBrowse";
-            buttonBrowse.Size = new Size(60, 23);
-            buttonBrowse.TabIndex = 6;
-            buttonBrowse.Text = "参照...";
-            buttonBrowse.Click += ButtonBrowse_Click;
-            // 
-            // buttonOK
-            // 
-            buttonOK.Location = new Point(80, 209);
-            buttonOK.Name = "buttonOK";
-            buttonOK.Size = new Size(75, 23);
-            buttonOK.TabIndex = 7;
-            buttonOK.Text = "OK";
-            buttonOK.Click += ButtonOK_Click;
-            // 
-            // buttonCancel
-            // 
-            buttonCancel.Location = new Point(180, 209);
-            buttonCancel.Name = "buttonCancel";
-            buttonCancel.Size = new Size(75, 23);
-            buttonCancel.TabIndex = 8;
-            buttonCancel.Text = "キャンセル";
-            buttonCancel.Click += ButtonCancel_Click;
+            checkBoxAutoClose.AutoSize = true;
+            checkBoxAutoClose.Location = new Point(20, 115);
+            checkBoxAutoClose.Name = "checkBoxAutoClose";
+            checkBoxAutoClose.Size = new Size(220, 19);
+            checkBoxAutoClose.TabIndex = 4;
+            checkBoxAutoClose.Text = "承諾後アプリを自動終了する";
+            checkBoxAutoClose.UseVisualStyleBackColor = true;
             // 
             // labelDelay
             // 
@@ -108,24 +86,58 @@ namespace LoL_AutoAccept
             // labelLoLDir
             // 
             labelLoLDir.AutoSize = true;
-            labelLoLDir.Location = new Point(20, 125);
+            labelLoLDir.Location = new Point(20, 145);
             labelLoLDir.Name = "labelLoLDir";
             labelLoLDir.Size = new Size(94, 15);
-            labelLoLDir.TabIndex = 4;
+            labelLoLDir.TabIndex = 5;
             labelLoLDir.Text = "LoLインストール先:";
+            // 
+            // textBoxLoLDir
+            // 
+            textBoxLoLDir.Location = new Point(20, 165);
+            textBoxLoLDir.Name = "textBoxLoLDir";
+            textBoxLoLDir.Size = new Size(250, 23);
+            textBoxLoLDir.TabIndex = 6;
+            // 
+            // buttonBrowse
+            // 
+            buttonBrowse.Location = new Point(280, 165);
+            buttonBrowse.Name = "buttonBrowse";
+            buttonBrowse.Size = new Size(60, 23);
+            buttonBrowse.TabIndex = 7;
+            buttonBrowse.Text = "参照...";
+            buttonBrowse.Click += ButtonBrowse_Click;
+            // 
+            // buttonOK
+            // 
+            buttonOK.Location = new Point(80, 235);
+            buttonOK.Name = "buttonOK";
+            buttonOK.Size = new Size(75, 23);
+            buttonOK.TabIndex = 9;
+            buttonOK.Text = "OK";
+            buttonOK.Click += ButtonOK_Click;
+            // 
+            // buttonCancel
+            // 
+            buttonCancel.Location = new Point(180, 235);
+            buttonCancel.Name = "buttonCancel";
+            buttonCancel.Size = new Size(75, 23);
+            buttonCancel.TabIndex = 10;
+            buttonCancel.Text = "キャンセル";
+            buttonCancel.Click += ButtonCancel_Click;
             // 
             // buttonOpenConfigFolder
             // 
-            buttonOpenConfigFolder.Location = new Point(20, 180);
+            buttonOpenConfigFolder.Location = new Point(20, 200);
             buttonOpenConfigFolder.Name = "buttonOpenConfigFolder";
             buttonOpenConfigFolder.Size = new Size(120, 23);
-            buttonOpenConfigFolder.TabIndex = 9;
+            buttonOpenConfigFolder.TabIndex = 8;
             buttonOpenConfigFolder.Text = "設定フォルダを開く";
             buttonOpenConfigFolder.Click += ButtonOpenConfigFolder_Click;
             // 
             // SettingsForm
             // 
-            ClientSize = new Size(370, 250);
+            ClientSize = new Size(370, 280);
             Controls.Add(checkBoxAutoAccept);
             Controls.Add(labelDelay);
             Controls.Add(numericUpDownDelay);
@@ -136,6 +148,7 @@ namespace LoL_AutoAccept
             Controls.Add(buttonOK);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOpenConfigFolder);
+            Controls.Add(checkBoxAutoClose);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
