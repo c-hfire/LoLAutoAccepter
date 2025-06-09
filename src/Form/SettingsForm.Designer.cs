@@ -50,7 +50,8 @@ namespace LoL_AutoAccept
             // numericUpDownDelay
             // 
             numericUpDownDelay.Location = new Point(128, 53);
-            numericUpDownDelay.Maximum = new decimal(new int[] { 30, 0, 0, 0 });
+            numericUpDownDelay.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
+            numericUpDownDelay.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             numericUpDownDelay.Name = "numericUpDownDelay";
             numericUpDownDelay.Size = new Size(60, 23);
             numericUpDownDelay.TabIndex = 2;
@@ -81,7 +82,7 @@ namespace LoL_AutoAccept
             labelDelay.Name = "labelDelay";
             labelDelay.Size = new Size(104, 15);
             labelDelay.TabIndex = 1;
-            labelDelay.Text = "承諾ディレイ（秒）:";
+            labelDelay.Text = "承諾の遅延（秒）:";
             // 
             // labelLoLDir
             // 

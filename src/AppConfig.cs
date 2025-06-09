@@ -7,8 +7,8 @@ public class AppConfig
 {
     /// <summary>自動承諾機能の有効/無効</summary>
     public bool AutoAcceptEnabled { get; set; } = true;
-    /// <summary>承諾までのディレイ秒数</summary>
-    public int AcceptDelaySeconds { get; set; } = 2;
+    /// <summary>承諾までのの遅延秒数</summary>
+    public int AcceptDelaySeconds { get; set; } = 0;
     /// <summary>Windows起動時に自動起動するか</summary>
     public bool StartWithWindows { get; set; } = false;
     /// <summary>承諾後アプリを自動終了するか</summary>
@@ -33,7 +33,15 @@ public class AppConfig
             if (File.Exists(ConfigPath))
             {
                 string json = File.ReadAllText(ConfigPath);
-                return JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+                var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+
+                // AcceptDelaySecondsの範囲を補正
+                if (config.AcceptDelaySeconds < 0)
+                    config.AcceptDelaySeconds = 0;
+                else if (config.AcceptDelaySeconds > 10)
+                    config.AcceptDelaySeconds = 10;
+
+                return config;
             }
         }
         catch (Exception ex)
