@@ -115,7 +115,7 @@ public static class AutoAccepter
                     if (!accepted)
                     {
                         Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
-                        await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
+                        await Task.Delay(config.AcceptDelaySeconds == 0 ? 100 : config.AcceptDelaySeconds * 1000);
                         await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
                         Logger.Write("マッチ承諾を送信しました。");
                         accepted = true;
