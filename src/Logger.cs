@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-/// <summary>
+﻿/// <summary>
 /// アプリケーションのログ出力を行う静的クラス
 /// </summary>
 public static class Logger

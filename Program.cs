@@ -1,7 +1,3 @@
-using System;
-using System.Threading;
-using System.Windows.Forms;
-
 namespace LoL_AutoAccept
 {
     internal static class Program

@@ -46,6 +46,8 @@ namespace LoL_AutoAccept
 
             if (isAutoAcceptEnabled)
                 StartWatcher();
+
+            UpdateNotifyIcon();
         }
 
         /// <summary>
@@ -66,6 +68,7 @@ namespace LoL_AutoAccept
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
             Logger.Write($"自動承諾を {(isAutoAcceptEnabled ? "ON" : "OFF")} に切り替えました。");
             SaveConfigAndWatcher();
+            UpdateNotifyIcon();
         }
 
         /// <summary>
@@ -210,6 +213,16 @@ namespace LoL_AutoAccept
                     });
                 }
             }
+        }
+
+        private void UpdateNotifyIcon()
+        {
+            // リソースからアイコンを取得
+            var icon = isAutoAcceptEnabled
+                ? Properties.Resource1.icon_color
+                : Properties.Resource1.icon_gray;
+
+            notifyIcon1.Icon = icon;
         }
     }
 }

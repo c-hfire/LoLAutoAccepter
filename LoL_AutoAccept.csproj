@@ -6,14 +6,30 @@
 		<Nullable>enable</Nullable>
 		<UseWindowsForms>true</UseWindowsForms>
 		<ImplicitUsings>enable</ImplicitUsings>
-		<ApplicationIcon>icon_color.ico</ApplicationIcon>
+		<ApplicationIcon>resources\icon_color.ico</ApplicationIcon>
 		<AssemblyName>LoLAutoAccepter</AssemblyName>
 		<StartupObject>LoL_AutoAccept.Program</StartupObject>
 		<GeneratePackageOnBuild>False</GeneratePackageOnBuild>
 	</PropertyGroup>
 
 	<ItemGroup>
-	  <Content Include="icon_color.ico" />
+	  <Content Include="resources\icon_color.ico" />
+	  <Content Include="resources\icon_gray.ico" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Compile Update="Properties\Resource1.Designer.cs">
+	    <DesignTime>True</DesignTime>
+	    <AutoGen>True</AutoGen>
+	    <DependentUpon>Resource1.resx</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <EmbeddedResource Update="Properties\Resource1.resx">
+	    <Generator>ResXFileCodeGenerator</Generator>
+	    <LastGenOutput>Resource1.Designer.cs</LastGenOutput>
+	  </EmbeddedResource>
 	</ItemGroup>
 
 </Project>

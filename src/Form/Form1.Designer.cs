@@ -42,7 +42,7 @@
             // notifyIcon1
             // 
             notifyIcon1.ContextMenuStrip = contextMenuStrip1;
-            notifyIcon1.Icon = (Icon)resources.GetObject("notifyIcon1.Icon");
+            notifyIcon1.Icon = Properties.Resource1.icon_color;
             notifyIcon1.Text = "LoL Auto Accepter";
             notifyIcon1.Visible = true;
             notifyIcon1.MouseDoubleClick += NotifyIcon1_DoubleClick;
