@@ -68,7 +68,6 @@ namespace LoL_AutoAccept
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
             Logger.Write($"é©ìÆè≥ë¯Ç {(isAutoAcceptEnabled ? "ON" : "OFF")} Ç…êÿÇËë÷Ç¶Ç‹ÇµÇΩÅB");
             SaveConfigAndWatcher();
-            UpdateNotifyIcon();
         }
 
         /// <summary>
@@ -96,6 +95,7 @@ namespace LoL_AutoAccept
         {
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
             config.Save();
+            UpdateNotifyIcon();
             StopWatcher();
             if (isAutoAcceptEnabled)
                 StartWatcher();
