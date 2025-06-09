@@ -1,3 +1,7 @@
+using System;
+using System.Threading;
+using System.Windows.Forms;
+
 namespace LoL_AutoAccept
 {
     internal static class Program
@@ -8,10 +12,19 @@ namespace LoL_AutoAccept
         [STAThread]
         static void Main()
         {
-            // To customize application configuration such as set high DPI settings or default font,
-            // see https://aka.ms/applicationconfiguration.
-            ApplicationConfiguration.Initialize();
-            Application.Run(new Form1());
+            bool createdNew;
+            using (var mutex = new Mutex(true, "LAA_SingleInstanceMutex", out createdNew))
+            {
+                if (!createdNew)
+                {
+                    MessageBox.Show("既にアプリケーションが起動しています。", "多重起動防止", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new Form1());
+            }
         }
     }
 }
