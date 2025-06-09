@@ -7,6 +7,9 @@ namespace LoL_AutoAccept
     {
         private readonly AppConfig config;
 
+        /// <summary>
+        /// 設定フォームを初期化します。
+        /// </summary>
         public SettingsForm(AppConfig config)
         {
             InitializeComponent();
@@ -36,6 +39,9 @@ namespace LoL_AutoAccept
         private static string ConfigFolderPath =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
 
+        /// <summary>
+        /// OKボタンクリック時の処理
+        /// </summary>
         private void ButtonOK_Click(object sender, EventArgs e)
         {
             SaveUIToConfig();
@@ -50,6 +56,9 @@ namespace LoL_AutoAccept
             Close();
         }
 
+        /// <summary>
+        /// キャンセルボタンクリック時の処理
+        /// </summary>
         private void ButtonCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;

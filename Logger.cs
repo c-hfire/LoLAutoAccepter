@@ -11,7 +11,7 @@ public static class Logger
         Path.Combine(LogDirectory, "log.txt");
 
     /// <summary>
-    /// メッセージをログファイルに追記します。
+    /// 指定したメッセージをログに記録します。
     /// </summary>
     /// <param name="message">出力するメッセージ</param>
     public static void Write(string message)

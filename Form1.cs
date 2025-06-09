@@ -3,24 +3,25 @@ using System.Text.Json;
 namespace LoL_AutoAccept
 {
     /// <summary>
-    /// メインフォームクラス。自動承諾機能や設定の管理を行う。
+    /// LoL自動承諾アプリのメインフォーム。
+    /// 設定管理・自動承諾ON/OFF・アップデート確認などを担当。
     /// </summary>
     public partial class Form1 : Form
     {
-        // アプリ名（スタートアップ登録用）
+        // スタートアップ登録用アプリ名
         private readonly string AppName = "LoL_Auto_Accepter";
-        // 自動承諾機能の有効/無効フラグ
+        // 自動承諾機能の有効/無効
         private bool isAutoAcceptEnabled = true;
-        // 設定情報
+        // アプリ設定
         private AppConfig config = new();
-        // Lockfile監視用
+        // Lockfile監視インスタンス
         private LockfileWatcher? lockfileWatcher;
 
         private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
         private const string CurrentVersion = "1.0.3";
 
         /// <summary>
-        /// フォーム初期化
+        /// フォームのコンストラクタ
         /// </summary>
         public Form1()
         {
@@ -28,14 +29,16 @@ namespace LoL_AutoAccept
         }
 
         /// <summary>
-        /// フォームロード時の処理
+        /// フォームロード時の初期化処理
         /// </summary>
         private void Form1_Load(object sender, EventArgs e)
         {
+            // 設定読込
             config = AppConfig.Load();
             config.StartWithWindows = StartupManager.IsStartupEnabled(AppName);
             config.Save();
 
+            // 自動承諾状態を反映
             isAutoAcceptEnabled = config.AutoAcceptEnabled;
             toggleAutoAcceptToolStripMenuItem.Checked = isAutoAcceptEnabled;
 
@@ -54,7 +57,7 @@ namespace LoL_AutoAccept
         }
 
         /// <summary>
-        /// 自動承諾ON/OFF切り替え
+        /// 自動承諾ON/OFF切替メニュークリック時
         /// </summary>
         private void ToggleAutoAcceptToolStripMenuItem_Click(object sender, EventArgs e)
         {
@@ -83,6 +86,9 @@ namespace LoL_AutoAccept
             lockfileWatcher = null;
         }
 
+        /// <summary>
+        /// 設定保存とLockfile監視再起動
+        /// </summary>
         private void SaveConfigAndWatcher()
         {
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
@@ -101,7 +107,7 @@ namespace LoL_AutoAccept
         }
 
         /// <summary>
-        /// フォームを最小化・タスクバー非表示で起動
+        /// 最小化・タスクバー非表示で起動し、アップデート確認
         /// </summary>
         protected override async void OnLoad(EventArgs e)
         {
@@ -110,23 +116,29 @@ namespace LoL_AutoAccept
             ShowInTaskbar = false;
             Visible = false;
 
-            // 起動時にアップデートチェック
+            // アップデートチェック
             await CheckForUpdateAsync();
         }
 
         /// <summary>
-        /// 通知アイコンのダブルクリックでウィンドウ表示
+        /// 通知アイコンのダブルクリックで設定ダイアログ表示
         /// </summary>
         private void NotifyIcon1_DoubleClick(object sender, MouseEventArgs e)
         {
             ShowSettingsDialog();
         }
 
+        /// <summary>
+        /// 設定メニュークリック時
+        /// </summary>
         private void SettingsStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowSettingsDialog();
         }
 
+        /// <summary>
+        /// 設定ダイアログ表示・OK時は設定反映
+        /// </summary>
         private void ShowSettingsDialog()
         {
             using var dlg = new SettingsForm(config);
@@ -138,6 +150,9 @@ namespace LoL_AutoAccept
             }
         }
 
+        /// <summary>
+        /// GitHubから最新バージョンを取得し、アップデートがあれば通知
+        /// </summary>
         private static async Task CheckForUpdateAsync()
         {
             try
@@ -164,7 +179,9 @@ namespace LoL_AutoAccept
             }
         }
 
-        // バージョン比較
+        /// <summary>
+        /// バージョン文字列を比較し、最新かどうか判定
+        /// </summary>
         private static bool IsNewerVersion(string latest, string current)
         {
             string l = latest.TrimStart('v', 'V');
@@ -176,7 +193,9 @@ namespace LoL_AutoAccept
             return false;
         }
 
-        // アップデート通知（タスクトレイバルーン or メッセージボックス等）
+        /// <summary>
+        /// 新バージョンがある場合に通知ダイアログを表示
+        /// </summary>
         private static void ShowUpdateNotification(string latestTag, string? url)
         {
             string msg = $"新しいバージョン {latestTag} が利用可能です。ダウンロードしますか？";

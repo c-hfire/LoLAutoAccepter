@@ -10,14 +10,19 @@ public class LockfileWatcher
     private Task? sessionTask;
     private FileSystemWatcher? fsWatcher;
     private string? lastLockfileContent;
-
     private string LockfilePath => Path.Combine(config.LeagueOfLegendsDirectory, "lockfile");
 
+    /// <summary>
+    /// LockfileWatcher の新しいインスタンスを初期化します。
+    /// </summary>
     public LockfileWatcher(AppConfig config)
     {
         this.config = config;
     }
 
+    /// <summary>
+    /// lockfile監視を開始します。
+    /// </summary>
     public void Start()
     {
         fsWatcher = new FileSystemWatcher(Path.GetDirectoryName(LockfilePath)!);
@@ -29,6 +34,9 @@ public class LockfileWatcher
         TryStartSession();
     }
 
+    /// <summary>
+    /// lockfile監視を停止します。
+    /// </summary>
     public void Stop()
     {
         fsWatcher?.Dispose();
@@ -39,11 +47,17 @@ public class LockfileWatcher
         sessionTask = null;
     }
 
+    /// <summary>
+    /// lockfile変更時の処理
+    /// </summary>
     private void OnLockfileChanged(object sender, FileSystemEventArgs e)
     {
         TryStartSession();
     }
 
+    /// <summary>
+    /// セッション開始を試みます。
+    /// </summary>
     private void TryStartSession()
     {
         if (!File.Exists(LockfilePath))
@@ -65,6 +79,9 @@ public class LockfileWatcher
         sessionTask = AutoAccepter.RunSessionAsync(sessionCts.Token, config, content);
     }
 
+    /// <summary>
+    /// lockfileの内容を読み取ります。
+    /// </summary>
     private static string? ReadLockfileContent(string path)
     {
         try

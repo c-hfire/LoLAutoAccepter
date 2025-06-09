@@ -1,7 +1,7 @@
 ﻿using Microsoft.Win32;
 
 /// <summary>
-/// アプリケーションのスタートアップ登録・解除を管理するクラス
+/// Windowsスタートアップ登録を管理するクラス
 /// </summary>
 public static class StartupManager
 {
