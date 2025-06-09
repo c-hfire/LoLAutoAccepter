@@ -16,6 +16,7 @@ namespace LoL_AutoAccept
         private AppConfig config = new();
         // Lockfile監視インスタンス
         private LockfileWatcher? lockfileWatcher;
+        private SettingsForm? settingsForm;
 
         private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
         private const string CurrentVersion = "1.0.3";
@@ -144,8 +145,15 @@ namespace LoL_AutoAccept
         /// </summary>
         private void ShowSettingsDialog()
         {
-            using var dlg = new SettingsForm(config);
-            if (dlg.ShowDialog(this) == DialogResult.OK)
+            if (settingsForm != null && !settingsForm.IsDisposed)
+            {
+                settingsForm.Activate();
+                return;
+            }
+
+            settingsForm = new SettingsForm(config);
+            settingsForm.FormClosed += (_, __) => settingsForm = null;
+            if (settingsForm.ShowDialog(this) == DialogResult.OK)
             {
                 Logger.Write("設定を保存しました。");
                 isAutoAcceptEnabled = config.AutoAcceptEnabled;
