@@ -28,7 +28,7 @@ public static class AutoAccepter
 
             if (!await WaitForApiReadyAsync(client, baseUrl, ct))
             {
-                Logger.Write("内部APIが30秒以内に起動しませんでした。再試行します。");
+                Logger.Write("内部APIが30秒以内に起動しませんでした。");
                 return;
             }
 

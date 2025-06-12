@@ -24,6 +24,7 @@ namespace LoL_AutoAccept
             checkBoxStartup.Checked = config.StartWithWindows;
             textBoxLoLDir.Text = config.LeagueOfLegendsDirectory;
             checkBoxAutoClose.Checked = config.AutoCloseOnAccept;
+            checkBoxDiscordRpc.Checked = config.DiscordRpcEnabled;
         }
 
         private void SaveUIToConfig()
@@ -33,6 +34,7 @@ namespace LoL_AutoAccept
             config.StartWithWindows = checkBoxStartup.Checked;
             config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
             config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
+            config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
             config.Save();
         }
 

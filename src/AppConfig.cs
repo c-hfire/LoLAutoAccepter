@@ -13,9 +13,11 @@ public class AppConfig
     public bool StartWithWindows { get; set; } = false;
     /// <summary>承諾後アプリを自動終了するか</summary>
     public bool AutoCloseOnAccept { get; set; } = false;
+    /// <summary>Discord Rich Presenceの有効/無効</summary>
+    public bool DiscordRpcEnabled { get; set; } = true;
     /// <summary>League of Legendsのインストールディレクトリ</summary>
     public string LeagueOfLegendsDirectory { get; set; } = @"C:\Riot Games\League of Legends";
-
+   
     // 設定ファイル保存ディレクトリ
     private static string ConfigDir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");

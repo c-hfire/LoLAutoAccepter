@@ -19,7 +19,7 @@ namespace LoL_AutoAccept
         private SettingsForm? settingsForm;
 
         private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
-        private const string CurrentVersion = "1.0.3";
+        private const string CurrentVersion = "1.0.4";
 
         /// <summary>
         /// フォームのコンストラクタ
@@ -27,6 +27,7 @@ namespace LoL_AutoAccept
         public Form1()
         {
             InitializeComponent();
+            // DiscordRPCの初期化は後で行う
         }
 
         /// <summary>
@@ -49,6 +50,12 @@ namespace LoL_AutoAccept
                 StartWatcher();
 
             UpdateNotifyIcon();
+
+            if (config.DiscordRpcEnabled)
+            {
+                DiscordRpcManager.Initialize();
+                DiscordRpcManager.SetPresence();
+            }
         }
 
         /// <summary>
@@ -57,6 +64,8 @@ namespace LoL_AutoAccept
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             SaveConfigAndWatcher();
+            if (config.DiscordRpcEnabled)
+                DiscordRpcManager.Shutdown();
         }
 
         /// <summary>
@@ -158,6 +167,16 @@ namespace LoL_AutoAccept
                 Logger.Write("設定を保存しました。");
                 isAutoAcceptEnabled = config.AutoAcceptEnabled;
                 SaveConfigAndWatcher();
+
+                if (config.DiscordRpcEnabled)
+                {
+                    DiscordRpcManager.Initialize();
+                    DiscordRpcManager.SetPresence();
+                }
+                else
+                {
+                    DiscordRpcManager.Shutdown();
+                }
             }
         }
 

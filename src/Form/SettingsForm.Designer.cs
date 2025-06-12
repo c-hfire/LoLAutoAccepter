@@ -14,6 +14,7 @@ namespace LoL_AutoAccept
         private Label labelLoLDir;
         private Button buttonOpenConfigFolder;
         private CheckBox checkBoxAutoClose;
+        private CheckBox checkBoxDiscordRpc;
 
         protected override void Dispose(bool disposing)
         {
@@ -35,6 +36,7 @@ namespace LoL_AutoAccept
             labelLoLDir = new Label();
             buttonOpenConfigFolder = new Button();
             checkBoxAutoClose = new CheckBox();
+            checkBoxDiscordRpc = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDelay).BeginInit();
             SuspendLayout();
             // 
@@ -75,6 +77,16 @@ namespace LoL_AutoAccept
             checkBoxAutoClose.Text = "承諾後アプリを自動終了する";
             checkBoxAutoClose.UseVisualStyleBackColor = true;
             // 
+            // checkBoxDiscordRpc
+            // 
+            checkBoxDiscordRpc.AutoSize = true;
+            checkBoxDiscordRpc.Location = new Point(20, 140);
+            checkBoxDiscordRpc.Name = "checkBoxDiscordRpc";
+            checkBoxDiscordRpc.Size = new Size(150, 19);
+            checkBoxDiscordRpc.TabIndex = 5;
+            checkBoxDiscordRpc.Text = "Discord RPCを有効にする";
+            checkBoxDiscordRpc.UseVisualStyleBackColor = true;
+            // 
             // labelDelay
             // 
             labelDelay.AutoSize = true;
@@ -87,69 +99,70 @@ namespace LoL_AutoAccept
             // labelLoLDir
             // 
             labelLoLDir.AutoSize = true;
-            labelLoLDir.Location = new Point(20, 145);
+            labelLoLDir.Location = new Point(20, 170);
             labelLoLDir.Name = "labelLoLDir";
             labelLoLDir.Size = new Size(94, 15);
-            labelLoLDir.TabIndex = 5;
+            labelLoLDir.TabIndex = 6;
             labelLoLDir.Text = "LoLインストール先:";
             // 
             // textBoxLoLDir
             // 
-            textBoxLoLDir.Location = new Point(20, 165);
+            textBoxLoLDir.Location = new Point(20, 190);
             textBoxLoLDir.Name = "textBoxLoLDir";
             textBoxLoLDir.Size = new Size(250, 23);
-            textBoxLoLDir.TabIndex = 6;
+            textBoxLoLDir.TabIndex = 7;
             // 
             // buttonBrowse
             // 
-            buttonBrowse.Location = new Point(280, 165);
+            buttonBrowse.Location = new Point(280, 190);
             buttonBrowse.Name = "buttonBrowse";
             buttonBrowse.Size = new Size(60, 23);
-            buttonBrowse.TabIndex = 7;
+            buttonBrowse.TabIndex = 8;
             buttonBrowse.Text = "参照...";
             buttonBrowse.Click += ButtonBrowse_Click;
             // 
             // buttonOK
             // 
-            buttonOK.Location = new Point(80, 235);
+            buttonOK.Location = new Point(80, 260);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(75, 23);
-            buttonOK.TabIndex = 9;
+            buttonOK.TabIndex = 10;
             buttonOK.Text = "OK";
             buttonOK.Click += ButtonOK_Click;
             // 
             // buttonCancel
             // 
-            buttonCancel.Location = new Point(180, 235);
+            buttonCancel.Location = new Point(180, 260);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(75, 23);
-            buttonCancel.TabIndex = 10;
+            buttonCancel.TabIndex = 11;
             buttonCancel.Text = "キャンセル";
             buttonCancel.Click += ButtonCancel_Click;
             // 
             // buttonOpenConfigFolder
             // 
-            buttonOpenConfigFolder.Location = new Point(20, 200);
+            buttonOpenConfigFolder.Location = new Point(20, 225);
             buttonOpenConfigFolder.Name = "buttonOpenConfigFolder";
             buttonOpenConfigFolder.Size = new Size(120, 23);
-            buttonOpenConfigFolder.TabIndex = 8;
+            buttonOpenConfigFolder.TabIndex = 9;
             buttonOpenConfigFolder.Text = "設定フォルダを開く";
             buttonOpenConfigFolder.Click += ButtonOpenConfigFolder_Click;
             // 
             // SettingsForm
             // 
-            ClientSize = new Size(370, 280);
+            ClientSize = new Size(370, 300);
             Controls.Add(checkBoxAutoAccept);
             Controls.Add(labelDelay);
             Controls.Add(numericUpDownDelay);
             Controls.Add(checkBoxStartup);
+            Controls.Add(checkBoxAutoClose);
+            Controls.Add(checkBoxDiscordRpc);
             Controls.Add(labelLoLDir);
             Controls.Add(textBoxLoLDir);
             Controls.Add(buttonBrowse);
             Controls.Add(buttonOK);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOpenConfigFolder);
-            Controls.Add(checkBoxAutoClose);
             FormBorderStyle = FormBorderStyle.FixedDialog;
             MaximizeBox = false;
             MinimizeBox = false;
