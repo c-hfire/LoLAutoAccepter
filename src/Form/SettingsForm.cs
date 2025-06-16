@@ -5,39 +5,50 @@ namespace LoL_AutoAccept
     /// </summary>
     public partial class SettingsForm : Form
     {
-        private readonly AppConfig config;
+        // 命名規則統一: フィールド名を _config に
+        private readonly AppConfig _config;
 
         /// <summary>
         /// 設定フォームを初期化します。
         /// </summary>
+        /// <param name="config">アプリケーション設定</param>
         public SettingsForm(AppConfig config)
         {
             InitializeComponent();
-            this.config = config;
-            LoadConfigToUI();
+            _config = config;
+            LoadSettings();
         }
 
-        private void LoadConfigToUI()
+        /// <summary>
+        /// UIに設定値をロードします。
+        /// </summary>
+        private void LoadSettings()
         {
-            checkBoxAutoAccept.Checked = config.AutoAcceptEnabled;
-            numericUpDownDelay.Value = config.AcceptDelaySeconds;
-            checkBoxStartup.Checked = config.StartWithWindows;
-            textBoxLoLDir.Text = config.LeagueOfLegendsDirectory;
-            checkBoxAutoClose.Checked = config.AutoCloseOnAccept;
-            checkBoxDiscordRpc.Checked = config.DiscordRpcEnabled;
+            checkBoxAutoAccept.Checked = _config.AutoAcceptEnabled;
+            numericUpDownDelay.Value = _config.AcceptDelaySeconds;
+            checkBoxStartup.Checked = _config.StartWithWindows;
+            textBoxLoLDir.Text = _config.LeagueOfLegendsDirectory;
+            checkBoxAutoClose.Checked = _config.AutoCloseOnAccept;
+            checkBoxDiscordRpc.Checked = _config.DiscordRpcEnabled;
         }
 
-        private void SaveUIToConfig()
+        /// <summary>
+        /// UIの値を設定に保存します。
+        /// </summary>
+        private void SaveSettings()
         {
-            config.AutoAcceptEnabled = checkBoxAutoAccept.Checked;
-            config.AcceptDelaySeconds = (int)numericUpDownDelay.Value;
-            config.StartWithWindows = checkBoxStartup.Checked;
-            config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
-            config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
-            config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
-            config.Save();
+            _config.AutoAcceptEnabled = checkBoxAutoAccept.Checked;
+            _config.AcceptDelaySeconds = (int)numericUpDownDelay.Value;
+            _config.StartWithWindows = checkBoxStartup.Checked;
+            _config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
+            _config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
+            _config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
+            _config.Save();
         }
 
+        /// <summary>
+        /// 設定フォルダのパスを取得します。
+        /// </summary>
         private static string ConfigFolderPath =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
 
@@ -46,10 +57,10 @@ namespace LoL_AutoAccept
         /// </summary>
         private void ButtonOK_Click(object sender, EventArgs e)
         {
-            SaveUIToConfig();
+            SaveSettings();
 
             StartupManager.SetStartupEnabled(
-                config.StartWithWindows,
+                _config.StartWithWindows,
                 "LoL_Auto_Accepter",
                 Application.ExecutablePath
             );
@@ -67,18 +78,24 @@ namespace LoL_AutoAccept
             Close();
         }
 
+        /// <summary>
+        /// フォルダ選択ダイアログを表示します。
+        /// </summary>
         private void ButtonBrowse_Click(object sender, EventArgs e)
         {
-            using var fbd = new FolderBrowserDialog
+            using var folderBrowserDialog = new FolderBrowserDialog
             {
                 SelectedPath = textBoxLoLDir.Text
             };
-            if (fbd.ShowDialog() == DialogResult.OK)
+            if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
             {
-                textBoxLoLDir.Text = fbd.SelectedPath;
+                textBoxLoLDir.Text = folderBrowserDialog.SelectedPath;
             }
         }
 
+        /// <summary>
+        /// 設定フォルダを開きます。
+        /// </summary>
         private void ButtonOpenConfigFolder_Click(object sender, EventArgs e)
         {
             try
@@ -94,7 +111,7 @@ namespace LoL_AutoAccept
             }
             catch (Exception ex)
             {
-                MessageBox.Show("設定フォルダのオープンに失敗: " + ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"設定フォルダのオープンに失敗: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }

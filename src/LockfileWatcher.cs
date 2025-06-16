@@ -10,6 +10,10 @@ public class LockfileWatcher
     private Task? sessionTask;
     private FileSystemWatcher? fsWatcher;
     private string? lastLockfileContent;
+
+    /// <summary>
+    /// lockfile のパスを取得します。
+    /// </summary>
     private string LockfilePath => Path.Combine(config.LeagueOfLegendsDirectory, "lockfile");
 
     /// <summary>
@@ -50,7 +54,7 @@ public class LockfileWatcher
     /// <summary>
     /// lockfile変更時の処理
     /// </summary>
-    private void OnLockfileChanged(object sender, FileSystemEventArgs e)
+    private void OnLockfileChanged(object? sender, FileSystemEventArgs e)
     {
         TryStartSession();
     }

@@ -8,17 +8,39 @@ namespace LoL_AutoAccept
     /// </summary>
     public partial class Form1 : Form
     {
-        // スタートアップ登録用アプリ名
+        /// <summary>
+        /// スタートアップ登録用アプリ名
+        /// </summary>
         private readonly string AppName = "LoL_Auto_Accepter";
-        // 自動承諾機能の有効/無効
+
+        /// <summary>
+        /// 自動承諾機能の有効/無効
+        /// </summary>
         private bool isAutoAcceptEnabled = true;
-        // アプリ設定
+
+        /// <summary>
+        /// アプリ設定
+        /// </summary>
         private AppConfig config = new();
-        // Lockfile監視インスタンス
+
+        /// <summary>
+        /// Lockfile監視インスタンス
+        /// </summary>
         private LockfileWatcher? lockfileWatcher;
+
+        /// <summary>
+        /// 設定フォームインスタンス
+        /// </summary>
         private SettingsForm? settingsForm;
 
+        /// <summary>
+        /// GitHub Releases API URL
+        /// </summary>
         private const string GitHubReleasesApiUrl = "https://api.github.com/repos/c-hfire/LoLAutoAccepter/releases/latest";
+
+        /// <summary>
+        /// 現在のバージョン
+        /// </summary>
         private const string CurrentVersion = "1.0.4";
 
         /// <summary>
@@ -56,6 +78,7 @@ namespace LoL_AutoAccept
                 DiscordRpcManager.Initialize();
                 DiscordRpcManager.SetPresence();
             }
+            ShowSettingsDialog();
         }
 
         /// <summary>
@@ -242,6 +265,9 @@ namespace LoL_AutoAccept
             }
         }
 
+        /// <summary>
+        /// 通知アイコンの状態を更新します。
+        /// </summary>
         private void UpdateNotifyIcon()
         {
             // リソースからアイコンを取得

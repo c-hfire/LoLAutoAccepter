@@ -7,7 +7,7 @@ public class AppConfig
 {
     /// <summary>自動承諾機能の有効/無効</summary>
     public bool AutoAcceptEnabled { get; set; } = true;
-    /// <summary>承諾までのの遅延秒数</summary>
+    /// <summary>承諾までの遅延秒数</summary>
     public int AcceptDelaySeconds { get; set; } = 0;
     /// <summary>Windows起動時に自動起動するか</summary>
     public bool StartWithWindows { get; set; } = false;
@@ -17,12 +17,16 @@ public class AppConfig
     public bool DiscordRpcEnabled { get; set; } = true;
     /// <summary>League of Legendsのインストールディレクトリ</summary>
     public string LeagueOfLegendsDirectory { get; set; } = @"C:\Riot Games\League of Legends";
-   
-    // 設定ファイル保存ディレクトリ
+
+    /// <summary>
+    /// 設定ファイル保存ディレクトリのパスを取得します。
+    /// </summary>
     private static string ConfigDir =>
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
 
-    // 設定ファイルパス
+    /// <summary>
+    /// 設定ファイルのパスを取得します。
+    /// </summary>
     private static string ConfigPath => Path.Combine(ConfigDir, "config.json");
 
     /// <summary>
@@ -32,26 +36,21 @@ public class AppConfig
     {
         try
         {
-            if (File.Exists(ConfigPath))
-            {
-                string json = File.ReadAllText(ConfigPath);
-                var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
+            if (!File.Exists(ConfigPath))
+                return new AppConfig();
 
-                // AcceptDelaySecondsの範囲を補正
-                if (config.AcceptDelaySeconds < 0)
-                    config.AcceptDelaySeconds = 0;
-                else if (config.AcceptDelaySeconds > 10)
-                    config.AcceptDelaySeconds = 10;
+            string json = File.ReadAllText(ConfigPath);
+            var config = JsonSerializer.Deserialize<AppConfig>(json) ?? new AppConfig();
 
-                return config;
-            }
+            config.AcceptDelaySeconds = Math.Clamp(config.AcceptDelaySeconds, 0, 10);
+
+            return config;
         }
         catch (Exception ex)
         {
-            Logger.Write("設定ファイルの読み込みエラー: " + ex.Message);
+            Logger.Write($"設定ファイルの読み込みエラー: {ex.Message}");
+            return new AppConfig();
         }
-
-        return new AppConfig();
     }
 
     /// <summary>
@@ -67,7 +66,7 @@ public class AppConfig
         }
         catch (Exception ex)
         {
-            Logger.Write("設定ファイルの保存エラー: " + ex.Message);
+            Logger.Write($"設定ファイルの保存エラー: {ex.Message}");
         }
     }
 

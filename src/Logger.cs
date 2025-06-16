@@ -26,9 +26,14 @@ public static class Logger
         }
     }
 
+    /// <summary>
+    /// ログディレクトリが存在しない場合は作成します。
+    /// </summary>
     private static void EnsureLogDirectory()
     {
         if (!Directory.Exists(LogDirectory))
+        {
             Directory.CreateDirectory(LogDirectory);
+        }
     }
 }
