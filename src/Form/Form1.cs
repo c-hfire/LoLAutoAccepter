@@ -1,3 +1,4 @@
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace LoL_AutoAccept
@@ -71,6 +72,7 @@ namespace LoL_AutoAccept
             if (isAutoAcceptEnabled)
                 StartWatcher();
 
+            _ = FetchAndSaveChampionDataAsync();
             UpdateNotifyIcon();
 
             if (config.DiscordRpcEnabled)
@@ -128,6 +130,7 @@ namespace LoL_AutoAccept
         {
             config.AutoAcceptEnabled = isAutoAcceptEnabled;
             config.Save();
+            _ = FetchAndSaveChampionDataAsync();
             UpdateNotifyIcon();
             StopWatcher();
             if (isAutoAcceptEnabled)
@@ -276,6 +279,54 @@ namespace LoL_AutoAccept
                 : Properties.Resource1.icon_gray;
 
             notifyIcon1.Icon = icon;
+        }
+
+        /// <summary>
+        /// 最新のチャンピオン一覧を取得し、ローカルにJSONで保存します。
+        /// </summary>
+        private static async Task FetchAndSaveChampionDataAsync()
+        {
+            try
+            {
+                // Data Dragonの最新バージョン取得
+                using var client = new HttpClient();
+                var versions = await client.GetFromJsonAsync<string[]>("https://ddragon.leagueoflegends.com/api/versions.json");
+                var latestVersion = versions?[0] ?? "15.12.1"; // バージョンが取得できない場合はデフォルト
+
+                // チャンピオンデータ取得
+                var champUrl = $"https://ddragon.leagueoflegends.com/cdn/{latestVersion}/data/ja_JP/champion.json";
+                var champJson = await client.GetStringAsync(champUrl);
+
+                using var doc = JsonDocument.Parse(champJson);
+                var data = doc.RootElement.GetProperty("data");
+
+                var champList = new List<object>();
+                foreach (var champ in data.EnumerateObject())
+                {
+                    var champObj = champ.Value;
+                    champList.Add(new
+                    {
+                        key = champObj.GetProperty("key").GetString(),
+                        name = champObj.GetProperty("name").GetString()
+                    });
+                }
+
+                // JSONファイルとして保存
+                var dateDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
+                var savePath = Path.Combine(dateDir, "champion_list.json");
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                var json = JsonSerializer.Serialize(champList, options);
+                await File.WriteAllTextAsync(savePath, json);
+                Logger.Write("Data Dragon保存成功");
+            }
+            catch (Exception ex)
+            {
+                Logger.Write("Data Dragon取得失敗: " + ex.Message);
+            }
         }
     }
 }

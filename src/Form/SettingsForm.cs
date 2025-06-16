@@ -1,3 +1,5 @@
+using System.Text.Json;
+
 namespace LoL_AutoAccept
 {
     /// <summary>
@@ -7,6 +9,8 @@ namespace LoL_AutoAccept
     {
         // 命名規則統一: フィールド名を _config に
         private readonly AppConfig _config;
+
+        private List<(string Key, string Name)> _championList = new();
 
         /// <summary>
         /// 設定フォームを初期化します。
@@ -30,6 +34,9 @@ namespace LoL_AutoAccept
             textBoxLoLDir.Text = _config.LeagueOfLegendsDirectory;
             checkBoxAutoClose.Checked = _config.AutoCloseOnAccept;
             checkBoxDiscordRpc.Checked = _config.DiscordRpcEnabled;
+            checkBoxAutoBan.Checked = _config.AutoBanEnabled;
+            LoadChampionList();
+            comboBoxAutoBanChampion.SelectedItem = _config.AutoBanChampionName ?? "";
         }
 
         /// <summary>
@@ -43,6 +50,8 @@ namespace LoL_AutoAccept
             _config.LeagueOfLegendsDirectory = textBoxLoLDir.Text;
             _config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
             _config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
+            _config.AutoBanEnabled = checkBoxAutoBan.Checked;
+            _config.AutoBanChampionName = comboBoxAutoBanChampion.SelectedItem as string;
             _config.Save();
         }
 
@@ -112,6 +121,39 @@ namespace LoL_AutoAccept
             catch (Exception ex)
             {
                 MessageBox.Show($"設定フォルダのオープンに失敗: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void LoadChampionList()
+        {
+            try
+            {
+                var path = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                    "LAA",
+                    "champion_list.json"
+                );
+                if (File.Exists(path))
+                {
+                    var json = File.ReadAllText(path);
+                    var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
+                    if (list != null)
+                    {
+                        _championList = list
+                            .Where(x => x.ContainsKey("key") && x.ContainsKey("name"))
+                            .Select(x => (x["key"], x["name"]))
+                            .OrderBy(x => x.Item2)
+                            .ToList();
+
+                        comboBoxAutoBanChampion.Items.Clear();
+                        comboBoxAutoBanChampion.Items.Add(""); // 空選択
+                        comboBoxAutoBanChampion.Items.AddRange(_championList.Select(x => x.Name).ToArray());
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Logger.Write("チャンピオンリスト読込失敗: " + ex.Message);
             }
         }
     }

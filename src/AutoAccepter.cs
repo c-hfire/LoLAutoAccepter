@@ -133,34 +133,35 @@ public static class AutoAccepter
             try
             {
                 var response = await client.GetAsync($"{baseUrl}/lol-matchmaking/v1/ready-check", ct);
-                if (!response.IsSuccessStatusCode)
+                if (response.IsSuccessStatusCode)
                 {
-                    await Task.Delay(1000, ct);
-                    continue;
-                }
-
-                string responseText = await response.Content.ReadAsStringAsync();
-
-                if (responseText.Contains("InProgress"))
-                {
-                    if (!accepted)
+                    string responseText = await response.Content.ReadAsStringAsync();
+                    if (responseText.Contains("InProgress"))
                     {
-                        Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
-                        await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
-                        await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
-                        Logger.Write("マッチ承諾を送信しました。");
-                        accepted = true;
-
-                        if (config.AutoCloseOnAccept)
+                        if (!accepted)
                         {
-                            Logger.Write("設定によりアプリを自動終了します。");
-                            Application.Exit();
+                            Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
+                            await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
+                            await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
+                            Logger.Write("マッチ承諾を送信しました。");
+                            accepted = true;
+
+                            if (config.AutoCloseOnAccept)
+                            {
+                                Logger.Write("設定によりアプリを自動終了します。");
+                                Application.Exit();
+                            }
                         }
                     }
+                    else
+                    {
+                        accepted = false;
+                    }
                 }
-                else
+
+                if (config.AutoBanEnabled)
                 {
-                    accepted = false;
+                    await AutoBanner.RunAsync(client, baseUrl, config, ct);
                 }
 
                 await Task.Delay(1000, ct);

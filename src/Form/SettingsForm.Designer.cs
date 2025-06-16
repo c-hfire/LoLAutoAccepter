@@ -15,6 +15,9 @@ namespace LoL_AutoAccept
         private Button buttonOpenConfigFolder;
         private CheckBox checkBoxAutoClose;
         private CheckBox checkBoxDiscordRpc;
+        private CheckBox checkBoxAutoBan;
+        private ComboBox comboBoxAutoBanChampion;
+        private Label labelAutoBanChampion;
 
         protected override void Dispose(bool disposing)
         {
@@ -37,6 +40,9 @@ namespace LoL_AutoAccept
             buttonOpenConfigFolder = new Button();
             checkBoxAutoClose = new CheckBox();
             checkBoxDiscordRpc = new CheckBox();
+            checkBoxAutoBan = new CheckBox();
+            comboBoxAutoBanChampion = new ComboBox();
+            labelAutoBanChampion = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDelay).BeginInit();
             SuspendLayout();
             // 
@@ -51,8 +57,7 @@ namespace LoL_AutoAccept
             // 
             // numericUpDownDelay
             // 
-            numericUpDownDelay.Location = new Point(128, 53);
-            numericUpDownDelay.Minimum = new decimal(new int[] { 0, 0, 0, 0 });
+            numericUpDownDelay.Location = new Point(130, 41);
             numericUpDownDelay.Maximum = new decimal(new int[] { 10, 0, 0, 0 });
             numericUpDownDelay.Name = "numericUpDownDelay";
             numericUpDownDelay.Size = new Size(60, 23);
@@ -61,60 +66,22 @@ namespace LoL_AutoAccept
             // checkBoxStartup
             // 
             checkBoxStartup.AutoSize = true;
-            checkBoxStartup.Location = new Point(20, 90);
+            checkBoxStartup.Location = new Point(20, 64);
             checkBoxStartup.Name = "checkBoxStartup";
             checkBoxStartup.Size = new Size(168, 19);
             checkBoxStartup.TabIndex = 3;
             checkBoxStartup.Text = "Windows起動時に自動起動";
             // 
-            // checkBoxAutoClose
-            // 
-            checkBoxAutoClose.AutoSize = true;
-            checkBoxAutoClose.Location = new Point(20, 115);
-            checkBoxAutoClose.Name = "checkBoxAutoClose";
-            checkBoxAutoClose.Size = new Size(220, 19);
-            checkBoxAutoClose.TabIndex = 4;
-            checkBoxAutoClose.Text = "承諾後アプリを自動終了する";
-            checkBoxAutoClose.UseVisualStyleBackColor = true;
-            // 
-            // checkBoxDiscordRpc
-            // 
-            checkBoxDiscordRpc.AutoSize = true;
-            checkBoxDiscordRpc.Location = new Point(20, 140);
-            checkBoxDiscordRpc.Name = "checkBoxDiscordRpc";
-            checkBoxDiscordRpc.Size = new Size(150, 19);
-            checkBoxDiscordRpc.TabIndex = 5;
-            checkBoxDiscordRpc.Text = "Discord RPCを有効にする";
-            checkBoxDiscordRpc.UseVisualStyleBackColor = true;
-            // 
-            // labelDelay
-            // 
-            labelDelay.AutoSize = true;
-            labelDelay.Location = new Point(20, 55);
-            labelDelay.Name = "labelDelay";
-            labelDelay.Size = new Size(104, 15);
-            labelDelay.TabIndex = 1;
-            labelDelay.Text = "承諾の遅延（秒）:";
-            // 
-            // labelLoLDir
-            // 
-            labelLoLDir.AutoSize = true;
-            labelLoLDir.Location = new Point(20, 170);
-            labelLoLDir.Name = "labelLoLDir";
-            labelLoLDir.Size = new Size(94, 15);
-            labelLoLDir.TabIndex = 6;
-            labelLoLDir.Text = "LoLインストール先:";
-            // 
             // textBoxLoLDir
             // 
-            textBoxLoLDir.Location = new Point(20, 190);
+            textBoxLoLDir.Location = new Point(20, 154);
             textBoxLoLDir.Name = "textBoxLoLDir";
             textBoxLoLDir.Size = new Size(250, 23);
             textBoxLoLDir.TabIndex = 7;
             // 
             // buttonBrowse
             // 
-            buttonBrowse.Location = new Point(280, 190);
+            buttonBrowse.Location = new Point(280, 154);
             buttonBrowse.Name = "buttonBrowse";
             buttonBrowse.Size = new Size(60, 23);
             buttonBrowse.TabIndex = 8;
@@ -123,34 +90,100 @@ namespace LoL_AutoAccept
             // 
             // buttonOK
             // 
-            buttonOK.Location = new Point(80, 260);
+            buttonOK.Location = new Point(184, 241);
             buttonOK.Name = "buttonOK";
             buttonOK.Size = new Size(75, 23);
-            buttonOK.TabIndex = 10;
+            buttonOK.TabIndex = 11;
             buttonOK.Text = "OK";
             buttonOK.Click += ButtonOK_Click;
             // 
             // buttonCancel
             // 
-            buttonCancel.Location = new Point(180, 260);
+            buttonCancel.Location = new Point(265, 241);
             buttonCancel.Name = "buttonCancel";
             buttonCancel.Size = new Size(75, 23);
-            buttonCancel.TabIndex = 11;
+            buttonCancel.TabIndex = 12;
             buttonCancel.Text = "キャンセル";
             buttonCancel.Click += ButtonCancel_Click;
             // 
+            // labelDelay
+            // 
+            labelDelay.AutoSize = true;
+            labelDelay.Location = new Point(20, 44);
+            labelDelay.Name = "labelDelay";
+            labelDelay.Size = new Size(104, 15);
+            labelDelay.TabIndex = 1;
+            labelDelay.Text = "承諾の遅延（秒）:";
+            // 
+            // labelLoLDir
+            // 
+            labelLoLDir.AutoSize = true;
+            labelLoLDir.Location = new Point(20, 136);
+            labelLoLDir.Name = "labelLoLDir";
+            labelLoLDir.Size = new Size(94, 15);
+            labelLoLDir.TabIndex = 6;
+            labelLoLDir.Text = "LoLインストール先:";
+            // 
             // buttonOpenConfigFolder
             // 
-            buttonOpenConfigFolder.Location = new Point(20, 225);
+            buttonOpenConfigFolder.Location = new Point(20, 241);
             buttonOpenConfigFolder.Name = "buttonOpenConfigFolder";
             buttonOpenConfigFolder.Size = new Size(120, 23);
-            buttonOpenConfigFolder.TabIndex = 9;
+            buttonOpenConfigFolder.TabIndex = 13;
             buttonOpenConfigFolder.Text = "設定フォルダを開く";
             buttonOpenConfigFolder.Click += ButtonOpenConfigFolder_Click;
             // 
+            // checkBoxAutoClose
+            // 
+            checkBoxAutoClose.AutoSize = true;
+            checkBoxAutoClose.Location = new Point(20, 88);
+            checkBoxAutoClose.Name = "checkBoxAutoClose";
+            checkBoxAutoClose.Size = new Size(164, 19);
+            checkBoxAutoClose.TabIndex = 4;
+            checkBoxAutoClose.Text = "承諾後アプリを自動終了する";
+            checkBoxAutoClose.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxDiscordRpc
+            // 
+            checkBoxDiscordRpc.AutoSize = true;
+            checkBoxDiscordRpc.Location = new Point(20, 112);
+            checkBoxDiscordRpc.Name = "checkBoxDiscordRpc";
+            checkBoxDiscordRpc.Size = new Size(151, 19);
+            checkBoxDiscordRpc.TabIndex = 5;
+            checkBoxDiscordRpc.Text = "Discord RPCを有効にする";
+            checkBoxDiscordRpc.UseVisualStyleBackColor = true;
+            // 
+            // checkBoxAutoBan
+            // 
+            checkBoxAutoBan.AutoSize = true;
+            checkBoxAutoBan.Location = new Point(20, 180);
+            checkBoxAutoBan.Name = "checkBoxAutoBan";
+            checkBoxAutoBan.Size = new Size(130, 19);
+            checkBoxAutoBan.TabIndex = 10;
+            checkBoxAutoBan.Text = "自動バンを有効にする";
+            checkBoxAutoBan.UseVisualStyleBackColor = true;
+            // 
+            // comboBoxAutoBanChampion
+            // 
+            comboBoxAutoBanChampion.DropDownStyle = ComboBoxStyle.DropDownList;
+            comboBoxAutoBanChampion.FormattingEnabled = true;
+            comboBoxAutoBanChampion.Location = new Point(170, 199);
+            comboBoxAutoBanChampion.Name = "comboBoxAutoBanChampion";
+            comboBoxAutoBanChampion.Size = new Size(180, 23);
+            comboBoxAutoBanChampion.TabIndex = 21;
+            // 
+            // labelAutoBanChampion
+            // 
+            labelAutoBanChampion.AutoSize = true;
+            labelAutoBanChampion.Location = new Point(24, 202);
+            labelAutoBanChampion.Name = "labelAutoBanChampion";
+            labelAutoBanChampion.Size = new Size(139, 15);
+            labelAutoBanChampion.TabIndex = 20;
+            labelAutoBanChampion.Text = "自動バン対象チャンピオン名";
+            // 
             // SettingsForm
             // 
-            ClientSize = new Size(370, 300);
+            ClientSize = new Size(370, 292);
             Controls.Add(checkBoxAutoAccept);
             Controls.Add(labelDelay);
             Controls.Add(numericUpDownDelay);
@@ -160,6 +193,9 @@ namespace LoL_AutoAccept
             Controls.Add(labelLoLDir);
             Controls.Add(textBoxLoLDir);
             Controls.Add(buttonBrowse);
+            Controls.Add(checkBoxAutoBan);
+            Controls.Add(labelAutoBanChampion);
+            Controls.Add(comboBoxAutoBanChampion);
             Controls.Add(buttonOK);
             Controls.Add(buttonCancel);
             Controls.Add(buttonOpenConfigFolder);

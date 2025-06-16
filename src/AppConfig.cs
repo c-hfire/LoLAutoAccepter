@@ -17,6 +17,10 @@ public class AppConfig
     public bool DiscordRpcEnabled { get; set; } = true;
     /// <summary>League of Legendsのインストールディレクトリ</summary>
     public string LeagueOfLegendsDirectory { get; set; } = @"C:\Riot Games\League of Legends";
+    /// <summary>自動バン機能の有効/無効</summary>
+    public bool AutoBanEnabled { get; set; } = false;
+    /// <summary>自動バン対象チャンピオン名</summary>
+    public string? AutoBanChampionName { get; set; }
 
     /// <summary>
     /// 設定ファイル保存ディレクトリのパスを取得します。
