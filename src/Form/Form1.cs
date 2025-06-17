@@ -69,7 +69,7 @@ namespace LoL_AutoAccept
 
             Logger.Write("LoL Auto Accepter ãNìÆäÆóπ");
 
-            if (isAutoAcceptEnabled)
+            if (isAutoAcceptEnabled || config.AutoBanEnabled)
                 StartWatcher();
 
             _ = FetchAndSaveChampionDataAsync();
@@ -133,7 +133,7 @@ namespace LoL_AutoAccept
             _ = FetchAndSaveChampionDataAsync();
             UpdateNotifyIcon();
             StopWatcher();
-            if (isAutoAcceptEnabled)
+            if (isAutoAcceptEnabled || config.AutoBanEnabled)
                 StartWatcher();
         }
 
@@ -194,6 +194,7 @@ namespace LoL_AutoAccept
             {
                 Logger.Write("ê›íËÇï€ë∂ÇµÇ‹ÇµÇΩÅB");
                 isAutoAcceptEnabled = config.AutoAcceptEnabled;
+                toggleAutoAcceptToolStripMenuItem.Checked = isAutoAcceptEnabled;
                 SaveConfigAndWatcher();
 
                 if (config.DiscordRpcEnabled)

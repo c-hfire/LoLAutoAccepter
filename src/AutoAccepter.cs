@@ -140,16 +140,19 @@ public static class AutoAccepter
                     {
                         if (!accepted)
                         {
-                            Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
-                            await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
-                            await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
-                            Logger.Write("マッチ承諾を送信しました。");
-                            accepted = true;
-
-                            if (config.AutoCloseOnAccept)
+                            if (config.AutoAcceptEnabled)
                             {
-                                Logger.Write("設定によりアプリを自動終了します。");
-                                Application.Exit();
+                                Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
+                                await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
+                                await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
+                                Logger.Write("マッチ承諾を送信しました。");
+                                accepted = true;
+
+                                if (config.AutoCloseOnAccept)
+                                {
+                                    Logger.Write("設定によりアプリを自動終了します。");
+                                    Application.Exit();
+                                }
                             }
                         }
                     }
@@ -186,7 +189,7 @@ public static class AutoAccepter
     /// サモナー名をログに出力します。
     /// </summary>
     /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
+    /// <param="baseUrl">APIのベースURL</param>
     /// <param name="ct">キャンセルトークン</param>
     private static async Task LogSummonerNameAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
