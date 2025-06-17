@@ -17,7 +17,6 @@ namespace LoL_AutoAccept
         private CheckBox checkBoxDiscordRpc;
         private CheckBox checkBoxAutoBan;
         private ComboBox comboBoxAutoBanChampion;
-        private Label labelAutoBanChampion;
 
         protected override void Dispose(bool disposing)
         {
@@ -42,7 +41,6 @@ namespace LoL_AutoAccept
             checkBoxDiscordRpc = new CheckBox();
             checkBoxAutoBan = new CheckBox();
             comboBoxAutoBanChampion = new ComboBox();
-            labelAutoBanChampion = new Label();
             ((System.ComponentModel.ISupportInitialize)numericUpDownDelay).BeginInit();
             SuspendLayout();
             // 
@@ -66,7 +64,7 @@ namespace LoL_AutoAccept
             // checkBoxStartup
             // 
             checkBoxStartup.AutoSize = true;
-            checkBoxStartup.Location = new Point(20, 64);
+            checkBoxStartup.Location = new Point(20, 70);
             checkBoxStartup.Name = "checkBoxStartup";
             checkBoxStartup.Size = new Size(168, 19);
             checkBoxStartup.TabIndex = 3;
@@ -74,14 +72,14 @@ namespace LoL_AutoAccept
             // 
             // textBoxLoLDir
             // 
-            textBoxLoLDir.Location = new Point(20, 154);
+            textBoxLoLDir.Location = new Point(20, 163);
             textBoxLoLDir.Name = "textBoxLoLDir";
             textBoxLoLDir.Size = new Size(250, 23);
             textBoxLoLDir.TabIndex = 7;
             // 
             // buttonBrowse
             // 
-            buttonBrowse.Location = new Point(280, 154);
+            buttonBrowse.Location = new Point(276, 162);
             buttonBrowse.Name = "buttonBrowse";
             buttonBrowse.Size = new Size(60, 23);
             buttonBrowse.TabIndex = 8;
@@ -118,7 +116,7 @@ namespace LoL_AutoAccept
             // labelLoLDir
             // 
             labelLoLDir.AutoSize = true;
-            labelLoLDir.Location = new Point(20, 136);
+            labelLoLDir.Location = new Point(20, 145);
             labelLoLDir.Name = "labelLoLDir";
             labelLoLDir.Size = new Size(94, 15);
             labelLoLDir.TabIndex = 6;
@@ -136,7 +134,7 @@ namespace LoL_AutoAccept
             // checkBoxAutoClose
             // 
             checkBoxAutoClose.AutoSize = true;
-            checkBoxAutoClose.Location = new Point(20, 88);
+            checkBoxAutoClose.Location = new Point(20, 95);
             checkBoxAutoClose.Name = "checkBoxAutoClose";
             checkBoxAutoClose.Size = new Size(164, 19);
             checkBoxAutoClose.TabIndex = 4;
@@ -146,7 +144,7 @@ namespace LoL_AutoAccept
             // checkBoxDiscordRpc
             // 
             checkBoxDiscordRpc.AutoSize = true;
-            checkBoxDiscordRpc.Location = new Point(20, 112);
+            checkBoxDiscordRpc.Location = new Point(20, 120);
             checkBoxDiscordRpc.Name = "checkBoxDiscordRpc";
             checkBoxDiscordRpc.Size = new Size(151, 19);
             checkBoxDiscordRpc.TabIndex = 5;
@@ -156,7 +154,7 @@ namespace LoL_AutoAccept
             // checkBoxAutoBan
             // 
             checkBoxAutoBan.AutoSize = true;
-            checkBoxAutoBan.Location = new Point(20, 180);
+            checkBoxAutoBan.Location = new Point(20, 196);
             checkBoxAutoBan.Name = "checkBoxAutoBan";
             checkBoxAutoBan.Size = new Size(130, 19);
             checkBoxAutoBan.TabIndex = 10;
@@ -167,23 +165,14 @@ namespace LoL_AutoAccept
             // 
             comboBoxAutoBanChampion.DropDownStyle = ComboBoxStyle.DropDownList;
             comboBoxAutoBanChampion.FormattingEnabled = true;
-            comboBoxAutoBanChampion.Location = new Point(170, 199);
+            comboBoxAutoBanChampion.Location = new Point(169, 192);
             comboBoxAutoBanChampion.Name = "comboBoxAutoBanChampion";
             comboBoxAutoBanChampion.Size = new Size(180, 23);
             comboBoxAutoBanChampion.TabIndex = 21;
             // 
-            // labelAutoBanChampion
-            // 
-            labelAutoBanChampion.AutoSize = true;
-            labelAutoBanChampion.Location = new Point(24, 202);
-            labelAutoBanChampion.Name = "labelAutoBanChampion";
-            labelAutoBanChampion.Size = new Size(139, 15);
-            labelAutoBanChampion.TabIndex = 20;
-            labelAutoBanChampion.Text = "自動バン対象チャンピオン名";
-            // 
             // SettingsForm
             // 
-            ClientSize = new Size(370, 292);
+            ClientSize = new Size(370, 291);
             Controls.Add(checkBoxAutoAccept);
             Controls.Add(labelDelay);
             Controls.Add(numericUpDownDelay);
@@ -194,7 +183,6 @@ namespace LoL_AutoAccept
             Controls.Add(textBoxLoLDir);
             Controls.Add(buttonBrowse);
             Controls.Add(checkBoxAutoBan);
-            Controls.Add(labelAutoBanChampion);
             Controls.Add(comboBoxAutoBanChampion);
             Controls.Add(buttonOK);
             Controls.Add(buttonCancel);

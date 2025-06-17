@@ -36,7 +36,6 @@ namespace LoL_AutoAccept
             checkBoxDiscordRpc.Checked = _config.DiscordRpcEnabled;
             checkBoxAutoBan.Checked = _config.AutoBanEnabled;
             LoadChampionList();
-            comboBoxAutoBanChampion.SelectedItem = _config.AutoBanChampionName ?? "";
         }
 
         /// <summary>
@@ -51,7 +50,10 @@ namespace LoL_AutoAccept
             _config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
             _config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
             _config.AutoBanEnabled = checkBoxAutoBan.Checked;
-            _config.AutoBanChampionName = comboBoxAutoBanChampion.SelectedItem as string;
+            // Name‚©‚çID‚ðŽæ“¾‚µ‚Ä•Û‘¶
+            var selectedName = comboBoxAutoBanChampion.SelectedItem as string;
+            var champ = _championList.FirstOrDefault(x => x.Name == selectedName);
+            _config.AutoBanChampionId = int.TryParse(champ.Key, out var id) ? id : (int?)null;
             _config.Save();
         }
 
@@ -139,15 +141,28 @@ namespace LoL_AutoAccept
                     var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
                     if (list != null)
                     {
-                        _championList = list
+                        _championList = [.. list
                             .Where(x => x.ContainsKey("key") && x.ContainsKey("name"))
                             .Select(x => (x["key"], x["name"]))
-                            .OrderBy(x => x.Item2)
-                            .ToList();
+                            .OrderBy(x => x.Item2)];
 
                         comboBoxAutoBanChampion.Items.Clear();
                         comboBoxAutoBanChampion.Items.Add(""); // ‹ó‘I‘ð
                         comboBoxAutoBanChampion.Items.AddRange(_championList.Select(x => x.Name).ToArray());
+
+                        // ‚±‚±‚ÅID‚©‚ç–¼‘O‚ð‹tˆø‚«‚µ‚Ä‘I‘ð
+                        if (_config.AutoBanChampionId.HasValue)
+                        {
+                            var champ = _championList.FirstOrDefault(x => int.Parse(x.Key) == _config.AutoBanChampionId.Value);
+                            if (!string.IsNullOrEmpty(champ.Name))
+                                comboBoxAutoBanChampion.SelectedItem = champ.Name;
+                            else
+                                comboBoxAutoBanChampion.SelectedItem = "";
+                        }
+                        else
+                        {
+                            comboBoxAutoBanChampion.SelectedItem = "";
+                        }
                     }
                 }
             }

@@ -8,9 +8,9 @@ public static class AutoBanner
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
         if (!config.AutoBanEnabled) return;
+        if (!config.AutoBanChampionId.HasValue) return;
 
-        int? championId = GetChampionIdByName(config.AutoBanChampionName);
-        if (championId == null) return;
+        int championId = config.AutoBanChampionId.Value;
 
         try
         {
@@ -31,12 +31,12 @@ public static class AutoBanner
                         action.GetProperty("isInProgress").GetBoolean())
                     {
                         int id = action.GetProperty("id").GetInt32();
-                        var banBody = JsonSerializer.Serialize(new { championId = championId.Value, completed = true });
+                        var banBody = JsonSerializer.Serialize(new { championId = championId, completed = true });
                         var content = new StringContent(banBody, System.Text.Encoding.UTF8, "application/json");
                         var banRes = await client.PatchAsync($"{baseUrl}/lol-champ-select/v1/session/actions/{id}", content, ct);
                         if (banRes.IsSuccessStatusCode)
                         {
-                            Logger.Write($"Ž©“®ƒoƒ“: {config.AutoBanChampionName}");
+                            Logger.Write($"Ž©“®ƒoƒ“: {GetChampionNameById(championId)}");
                         }
                         return;
                     }
@@ -56,9 +56,9 @@ public static class AutoBanner
             : -1;
     }
 
-    private static int? GetChampionIdByName(string? name)
+    private static string? GetChampionNameById(int? id)
     {
-        if (string.IsNullOrEmpty(name)) return null;
+        if (!id.HasValue) return null;
         try
         {
             var path = Path.Combine(
@@ -70,9 +70,9 @@ public static class AutoBanner
             {
                 var json = File.ReadAllText(path);
                 var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
-                var champ = list?.FirstOrDefault(x => x.TryGetValue("name", out var n) && n == name);
-                if (champ != null && champ.TryGetValue("key", out var keyStr) && int.TryParse(keyStr, out var id))
-                    return id;
+                var champ = list?.FirstOrDefault(x => x.TryGetValue("key", out var keyStr) && int.TryParse(keyStr, out var champId) && champId == id.Value);
+                if (champ != null && champ.TryGetValue("name", out var name))
+                    return name;
             }
         }
         catch { }

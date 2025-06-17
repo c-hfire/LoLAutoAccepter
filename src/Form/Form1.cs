@@ -180,6 +180,8 @@ namespace LoL_AutoAccept
         /// </summary>
         private void ShowSettingsDialog()
         {
+            config = AppConfig.Load();
+
             if (settingsForm != null && !settingsForm.IsDisposed)
             {
                 settingsForm.Activate();
