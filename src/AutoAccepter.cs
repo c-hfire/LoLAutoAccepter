@@ -1,5 +1,6 @@
-﻿using System.Net.Http.Headers;
-using System.Text;
+﻿using LoLAutoAccepter.Models;
+using LoLAutoAccepter.Services;
+using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
 /// <summary>
@@ -17,13 +18,15 @@ public static class AutoAccepter
     {
         try
         {
-            if (!TryParseLockfile(lockfileContent, out var baseUrl, out var auth))
+            // LockfileParser を利用して lockfile を解析
+            if (!LockfileParser.TryParse(lockfileContent, out var baseUrl, out var auth))
             {
                 Logger.Write("lockfile の形式が不正です。");
                 return;
             }
 
-            using var client = CreateHttpClient(auth);
+            // LcuApiClient を利用して HttpClient を生成
+            using var client = LcuApiClient.Create(auth);
 
             Logger.Write($"接続成功: {baseUrl}");
             await LogSummonerNameAsync(client, baseUrl, ct);
@@ -40,48 +43,6 @@ public static class AutoAccepter
         {
             Logger.Write($"例外発生: {ex.Message}");
         }
-    }
-
-    /// <summary>
-    /// lockfile の内容を解析し、APIのベースURLと認証情報を取得します。
-    /// </summary>
-    /// <param name="lockfileContent">lockfile の内容</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="auth">認証情報</param>
-    /// <returns>解析に成功した場合は true</returns>
-    private static bool TryParseLockfile(string lockfileContent, out string baseUrl, out string auth)
-    {
-        baseUrl = string.Empty;
-        auth = string.Empty;
-        var parts = lockfileContent.Split(':');
-        if (parts.Length < 5) return false;
-
-        string port = parts[2];
-        string token = parts[3];
-        string protocol = parts[4].Trim();
-
-        baseUrl = $"{protocol}://127.0.0.1:{port}";
-        auth = Convert.ToBase64String(Encoding.ASCII.GetBytes($"riot:{token}"));
-        return true;
-    }
-
-    /// <summary>
-    /// 認証情報付きの HttpClient を作成します。
-    /// </summary>
-    /// <param name="auth">認証情報</param>
-    /// <returns>HttpClient インスタンス</returns>
-    private static HttpClient CreateHttpClient(string auth)
-    {
-        var handler = new HttpClientHandler
-        {
-            ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-        };
-        var client = new HttpClient(handler)
-        {
-            Timeout = TimeSpan.FromSeconds(10)
-        };
-        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", auth);
-        return client;
     }
 
     /// <summary>
@@ -189,7 +150,7 @@ public static class AutoAccepter
     /// サモナー名をログに出力します。
     /// </summary>
     /// <param name="client">HttpClient</param>
-    /// <param="baseUrl">APIのベースURL</param>
+    /// <param name="baseUrl">APIのベースURL</param>
     /// <param name="ct">キャンセルトークン</param>
     private static async Task LogSummonerNameAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {

@@ -1,3 +1,5 @@
+using LoLAutoAccepter.Models;
+using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
 namespace LoL_AutoAccept
@@ -126,6 +128,9 @@ namespace LoL_AutoAccept
             }
         }
 
+        /// <summary>
+        /// チャンピオンリストをロードします。
+        /// </summary>
         private void LoadChampionList()
         {
             try

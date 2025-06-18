@@ -1,3 +1,5 @@
+using LoLAutoAccepter.Models;
+using LoLAutoAccepter.Utilities;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -148,6 +150,7 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 最小化・タスクバー非表示で起動し、アップデート確認
         /// </summary>
+        /// <param name="e">イベント引数</param>
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -162,6 +165,8 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 通知アイコンのダブルクリックで設定ダイアログ表示
         /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">マウスイベント引数</param>
         private void NotifyIcon1_DoubleClick(object sender, MouseEventArgs e)
         {
             ShowSettingsDialog();
@@ -170,6 +175,8 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 設定メニュークリック時
         /// </summary>
+        /// <param name="sender">イベント送信元</param>
+        /// <param name="e">イベント引数</param>
         private void SettingsStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowSettingsDialog();
@@ -241,6 +248,9 @@ namespace LoL_AutoAccept
         /// <summary>
         /// バージョン文字列を比較し、最新かどうか判定
         /// </summary>
+        /// <param name="latest">最新バージョン</param>
+        /// <param name="current">現在のバージョン</param>
+        /// <returns>新しい場合はtrue</returns>
         private static bool IsNewerVersion(string latest, string current)
         {
             string l = latest.TrimStart('v', 'V');
@@ -255,6 +265,8 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 新バージョンがある場合に通知ダイアログを表示
         /// </summary>
+        /// <param name="latestTag">最新バージョンのタグ</param>
+        /// <param name="url">ダウンロードURL</param>
         private static void ShowUpdateNotification(string latestTag, string? url)
         {
             string msg = $"新しいバージョン {latestTag} が利用可能です。ダウンロードしますか？";

@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using LoLAutoAccepter.Models;
+using LoLAutoAccepter.Services;
+using LoLAutoAccepter.Utilities;
+using System.Text;
 
 /// <summary>
 /// lockfile の監視とセッション管理を行うクラス
@@ -19,6 +22,7 @@ public class LockfileWatcher
     /// <summary>
     /// LockfileWatcher の新しいインスタンスを初期化します。
     /// </summary>
+    /// <param name="config">アプリ設定</param>
     public LockfileWatcher(AppConfig config)
     {
         this.config = config;
@@ -54,6 +58,8 @@ public class LockfileWatcher
     /// <summary>
     /// lockfile変更時の処理
     /// </summary>
+    /// <param name="sender">イベント送信元</param>
+    /// <param name="e">イベント引数</param>
     private void OnLockfileChanged(object? sender, FileSystemEventArgs e)
     {
         TryStartSession();
@@ -74,6 +80,13 @@ public class LockfileWatcher
         if (content == null || content == lastLockfileContent)
             return;
 
+        // lockfile の内容が有効かどうかチェック
+        if (!LockfileParser.TryParse(content, out _, out _))
+        {
+            Logger.Write("lockfile の内容が不正です。セッション開始中止。");
+            return;
+        }
+
         lastLockfileContent = content;
 
         sessionCts?.Cancel();
@@ -86,6 +99,8 @@ public class LockfileWatcher
     /// <summary>
     /// lockfileの内容を読み取ります。
     /// </summary>
+    /// <param name="path">lockfileのパス</param>
+    /// <returns>内容文字列またはnull</returns>
     private static string? ReadLockfileContent(string path)
     {
         try

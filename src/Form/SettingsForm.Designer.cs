@@ -1,5 +1,10 @@
 namespace LoL_AutoAccept
 {
+    using LoLAutoAccepter.Models;
+
+    /// <summary>
+    /// 設定フォームのデザイナークラス
+    /// </summary>
     partial class SettingsForm
     {
         private System.ComponentModel.IContainer components = null;
@@ -18,6 +23,10 @@ namespace LoL_AutoAccept
         private CheckBox checkBoxAutoBan;
         private ComboBox comboBoxAutoBanChampion;
 
+        /// <summary>
+        /// デザイナーで必要なメソッド。リソースのクリーンアップを実行します。
+        /// </summary>
+        /// <param name="disposing">マネージドリソースを破棄する場合は true</param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
@@ -25,6 +34,9 @@ namespace LoL_AutoAccept
             base.Dispose(disposing);
         }
 
+        /// <summary>
+        /// コントロールの初期化
+        /// </summary>
         private void InitializeComponent()
         {
             checkBoxAutoAccept = new CheckBox();

@@ -1,10 +1,19 @@
+using LoLAutoAccepter.Models;
+using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
+/// <summary>
+/// ドラフトピック時の自動バン処理を行うクラス
+/// </summary>
 public static class AutoBanner
 {
     /// <summary>
-    /// バンフェーズで自動バンを行う
+    /// 指定された設定に従い自動バンを実行します。
     /// </summary>
+    /// <param name="client">HttpClient</param>
+    /// <param name="baseUrl">APIのベースURL</param>
+    /// <param name="config">アプリ設定</param>
+    /// <param name="ct">キャンセルトークン</param>
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
         if (!config.AutoBanEnabled) return;
@@ -49,6 +58,11 @@ public static class AutoBanner
         }
     }
 
+    /// <summary>
+    /// ローカルプレイヤーのセルIDを取得します。
+    /// </summary>
+    /// <param name="sessionRoot">セッションのルート要素</param>
+    /// <returns>ローカルプレイヤーのセルID</returns>
     private static int GetLocalCellId(JsonElement sessionRoot)
     {
         return sessionRoot.TryGetProperty("localPlayerCellId", out var cellIdProp)
@@ -56,6 +70,11 @@ public static class AutoBanner
             : -1;
     }
 
+    /// <summary>
+    /// チャンピオンIDからチャンピオン名を取得します。
+    /// </summary>
+    /// <param name="id">チャンピオンID</param>
+    /// <returns>チャンピオン名</returns>
     private static string? GetChampionNameById(int? id)
     {
         if (!id.HasValue) return null;
