@@ -94,9 +94,27 @@ namespace LoLAutoAccepter.Utilities
                     if (ban.ValueKind == JsonValueKind.Number && ban.GetInt32() > 0)
                         banned.Add(ban.GetInt32());
             }
+
+            if (root.TryGetProperty("actions", out var actionsArray))
+            {
+                foreach (var actionGroup in actionsArray.EnumerateArray())
+                {
+                    foreach (var action in actionGroup.EnumerateArray())
+                    {
+                        if (action.TryGetProperty("type", out var typeProp) &&
+                            typeProp.GetString() == "ban" &&
+                            action.TryGetProperty("championId", out var champIdProp))
+                        {
+                            int champId = champIdProp.GetInt32();
+                            if (champId > 0)
+                                banned.Add(champId);
+                        }
+                    }
+                }
+            }
+
             return banned;
         }
-
 
         /// <summary>
         /// すでにピックされているチャンピオンID一覧を取得
