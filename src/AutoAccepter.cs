@@ -18,24 +18,14 @@ public static class AutoAccepter
     {
         try
         {
-            // LockfileParser を利用して lockfile を解析
-            if (!LockfileParser.TryParse(lockfileContent, out var baseUrl, out var auth))
-            {
-                Logger.Write("lockfile の形式が不正です。");
-                return;
-            }
+            if (!TryParseLockfile(lockfileContent, out var baseUrl, out var auth)) return;
 
-            // LcuApiClient を利用して HttpClient を生成
             using var client = LcuApiClient.Create(auth);
 
             Logger.Write($"接続成功: {baseUrl}");
             await LogSummonerNameAsync(client, baseUrl, ct);
 
-            if (!await WaitForApiReadyAsync(client, baseUrl, ct))
-            {
-                Logger.Write("内部APIが30秒以内に起動しませんでした。");
-                return;
-            }
+            if (!await WaitForApiReadyAsync(client, baseUrl, ct)) return;
 
             await MonitorAndAcceptAsync(client, baseUrl, config, ct);
         }
@@ -43,6 +33,16 @@ public static class AutoAccepter
         {
             Logger.Write($"例外発生: {ex.Message}");
         }
+    }
+
+    private static bool TryParseLockfile(string lockfileContent, out string baseUrl, out string auth)
+    {
+        if (!LockfileParser.TryParse(lockfileContent, out baseUrl, out auth))
+        {
+            Logger.Write("lockfile の形式が不正です。");
+            return false;
+        }
+        return true;
     }
 
     /// <summary>
@@ -76,6 +76,7 @@ public static class AutoAccepter
             }
             await Task.Delay(500, ct);
         }
+        Logger.Write("内部APIが30秒以内に起動しませんでした。");
         return false;
     }
 
@@ -93,34 +94,21 @@ public static class AutoAccepter
         {
             try
             {
-                var response = await client.GetAsync($"{baseUrl}/lol-matchmaking/v1/ready-check", ct);
-                if (response.IsSuccessStatusCode)
+                if (await TryAcceptMatchAsync(client, baseUrl, config, ct))
                 {
-                    string responseText = await response.Content.ReadAsStringAsync();
-                    if (responseText.Contains("InProgress"))
+                    if (!accepted)
                     {
-                        if (!accepted)
+                        accepted = true;
+                        if (config.AutoCloseOnAccept)
                         {
-                            if (config.AutoAcceptEnabled)
-                            {
-                                Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
-                                await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
-                                await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
-                                Logger.Write("マッチ承諾を送信しました。");
-                                accepted = true;
-
-                                if (config.AutoCloseOnAccept)
-                                {
-                                    Logger.Write("設定によりアプリを自動終了します。");
-                                    Application.Exit();
-                                }
-                            }
+                            Logger.Write("設定によりアプリを自動終了します。");
+                            Application.Exit();
                         }
                     }
-                    else
-                    {
-                        accepted = false;
-                    }
+                }
+                else
+                {
+                    accepted = false;
                 }
 
                 if (config.AutoBanEnabled)
@@ -144,6 +132,37 @@ public static class AutoAccepter
                 Logger.Write($"監視ループ中の例外: {ex.Message}");
             }
         }
+    }
+
+    /// <summary>
+    /// マッチング検出と承諾処理を行います。
+    /// </summary>
+    /// <param name="client">HttpClient</param>
+    /// <param name="baseUrl">APIのベースURL</param>
+    /// <param name="config">アプリ設定</param>
+    /// <param name="ct">キャンセルトークン</param>
+    /// <returns>マッチが承諾された場合は true</returns>
+    private static async Task<bool> TryAcceptMatchAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
+    {
+        var response = await client.GetAsync($"{baseUrl}/lol-matchmaking/v1/ready-check", ct);
+        if (!response.IsSuccessStatusCode)
+        {
+            return false;
+        }
+
+        string responseText = await response.Content.ReadAsStringAsync();
+        if (responseText.Contains("InProgress"))
+        {
+            if (config.AutoAcceptEnabled)
+            {
+                Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
+                await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
+                await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
+                Logger.Write("マッチ承諾を送信しました。");
+                return true;
+            }
+        }
+        return false;
     }
 
     /// <summary>

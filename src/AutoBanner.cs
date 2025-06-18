@@ -10,59 +10,97 @@ public static class AutoBanner
     /// <summary>
     /// 指定された設定に従い自動バンを実行します。
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="config">アプリ設定</param>
-    /// <param name="ct">キャンセルトークン</param>
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
-        if (!config.AutoBanEnabled) return;
-        if (!config.AutoBanChampionId.HasValue) return;
-
-        int championId = config.AutoBanChampionId.Value;
+        if (!config.AutoBanEnabled || !config.AutoBanChampionId.HasValue) return;
 
         try
         {
-            var res = await client.GetAsync($"{baseUrl}/lol-champ-select/v1/session", ct);
-            if (!res.IsSuccessStatusCode) return;
+            var sessionJson = await GetSessionJsonAsync(client, baseUrl, ct);
+            if (sessionJson is null) return;
 
-            var json = await res.Content.ReadAsStringAsync(ct);
-            using var doc = JsonDocument.Parse(json);
+            using var doc = JsonDocument.Parse(sessionJson);
+
+            if (IsCustomGame(doc.RootElement)) return;
+
+            var bannedChampionIds = GetBannedChampionIds(doc.RootElement);
+            if (bannedChampionIds.Contains(config.AutoBanChampionId.Value))
+            {
+                return;
+            }
 
             if (!doc.RootElement.TryGetProperty("actions", out var actionsArray)) return;
 
-            foreach (var actionGroup in actionsArray.EnumerateArray())
+            var banAction = FindBanAction(actionsArray, GetLocalCellId(doc.RootElement));
+            if (banAction is null) return;
+
+            await ExecuteBanAsync(client, baseUrl, banAction.Value, config.AutoBanChampionId.Value, ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.Write($"AutoBannerエラー: {ex}");
+        }
+    }
+
+    private static async Task<string?> GetSessionJsonAsync(HttpClient client, string baseUrl, CancellationToken ct)
+    {
+        try
+        {
+            var res = await client.GetAsync($"{baseUrl}/lol-champ-select/v1/session", ct);
+            if (!res.IsSuccessStatusCode) return null;
+            return await res.Content.ReadAsStringAsync(ct);
+        }
+        catch (Exception ex)
+        {
+            Logger.Write($"セッション取得エラー: {ex.Message}");
+            return null;
+        }
+    }
+
+    private static bool IsCustomGame(JsonElement root)
+    {
+        return root.TryGetProperty("isCustomGame", out var isCustomGameProp) && isCustomGameProp.GetBoolean();
+    }
+
+    private static JsonElement? FindBanAction(JsonElement actionsArray, int localCellId)
+    {
+        foreach (var actionGroup in actionsArray.EnumerateArray())
+        {
+            foreach (var action in actionGroup.EnumerateArray())
             {
-                foreach (var action in actionGroup.EnumerateArray())
+                if (action.GetProperty("type").GetString() is "ban" &&
+                    action.GetProperty("actorCellId").GetInt32() == localCellId &&
+                    action.GetProperty("isInProgress").GetBoolean())
                 {
-                    if (action.GetProperty("type").GetString() is "ban" &&
-                        action.GetProperty("actorCellId").GetInt32() == GetLocalCellId(doc.RootElement) &&
-                        action.GetProperty("isInProgress").GetBoolean())
-                    {
-                        int id = action.GetProperty("id").GetInt32();
-                        var banBody = JsonSerializer.Serialize(new { championId = championId, completed = true });
-                        var content = new StringContent(banBody, System.Text.Encoding.UTF8, "application/json");
-                        var banRes = await client.PatchAsync($"{baseUrl}/lol-champ-select/v1/session/actions/{id}", content, ct);
-                        if (banRes.IsSuccessStatusCode)
-                        {
-                            Logger.Write($"自動バン: {GetChampionNameById(championId)}");
-                        }
-                        return;
-                    }
+                    return action;
                 }
+            }
+        }
+        return null;
+    }
+
+    private static async Task ExecuteBanAsync(HttpClient client, string baseUrl, JsonElement action, int championId, CancellationToken ct)
+    {
+        try
+        {
+            int id = action.GetProperty("id").GetInt32();
+            var banBody = JsonSerializer.Serialize(new { championId, completed = true });
+            var content = new StringContent(banBody, System.Text.Encoding.UTF8, "application/json");
+            var banRes = await client.PatchAsync($"{baseUrl}/lol-champ-select/v1/session/actions/{id}", content, ct);
+            if (banRes.IsSuccessStatusCode)
+            {
+                Logger.Write($"自動バン: {GetChampionNameById(championId)}");
             }
         }
         catch (Exception ex)
         {
-            Logger.Write($"AutoBannerエラー: {ex.Message}");
+            Logger.Write($"バン実行エラー: {ex.Message}");
         }
     }
 
     /// <summary>
     /// ローカルプレイヤーのセルIDを取得します。
     /// </summary>
-    /// <param name="sessionRoot">セッションのルート要素</param>
-    /// <returns>ローカルプレイヤーのセルID</returns>
     private static int GetLocalCellId(JsonElement sessionRoot)
     {
         return sessionRoot.TryGetProperty("localPlayerCellId", out var cellIdProp)
@@ -73,8 +111,6 @@ public static class AutoBanner
     /// <summary>
     /// チャンピオンIDからチャンピオン名を取得します。
     /// </summary>
-    /// <param name="id">チャンピオンID</param>
-    /// <returns>チャンピオン名</returns>
     private static string? GetChampionNameById(int? id)
     {
         if (!id.HasValue) return null;
@@ -85,16 +121,43 @@ public static class AutoBanner
                 "LAA",
                 "champion_list.json"
             );
-            if (File.Exists(path))
-            {
-                var json = File.ReadAllText(path);
-                var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
-                var champ = list?.FirstOrDefault(x => x.TryGetValue("key", out var keyStr) && int.TryParse(keyStr, out var champId) && champId == id.Value);
-                if (champ != null && champ.TryGetValue("name", out var name))
-                    return name;
-            }
+            if (!File.Exists(path)) return null;
+
+            var json = File.ReadAllText(path);
+            var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
+            if (list is null) return null;
+
+            var champ = list.FirstOrDefault(x =>
+                x.TryGetValue("key", out var keyStr) &&
+                int.TryParse(keyStr, out var champId) &&
+                champId == id.Value);
+
+            if (champ != null && champ.TryGetValue("name", out var name))
+                return name;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Logger.Write($"チャンピオン名取得エラー: {ex.Message}");
+        }
         return null;
+    }
+    /// </summary>
+    /// すでにバンされているチャンピオンID一覧を取得
+    /// </summary>
+    private static HashSet<int> GetBannedChampionIds(JsonElement root)
+    {
+        var banned = new HashSet<int>();
+        if (root.TryGetProperty("bans", out var bansProp) &&
+            bansProp.TryGetProperty("myTeamBans", out var myTeamBans) &&
+            bansProp.TryGetProperty("theirTeamBans", out var theirTeamBans))
+        {
+            foreach (var ban in myTeamBans.EnumerateArray())
+                if (ban.ValueKind == JsonValueKind.Number && ban.GetInt32() > 0)
+                    banned.Add(ban.GetInt32());
+            foreach (var ban in theirTeamBans.EnumerateArray())
+                if (ban.ValueKind == JsonValueKind.Number && ban.GetInt32() > 0)
+                    banned.Add(ban.GetInt32());
+        }
+        return banned;
     }
 }
