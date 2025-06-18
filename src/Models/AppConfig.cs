@@ -19,13 +19,26 @@ namespace LoLAutoAccepter.Models
         public string LeagueOfLegendsDirectory { get; set; } = @"C:\Riot Games\League of Legends";
         /// <summary>自動バン機能の有効/無効</summary>
         public bool AutoBanEnabled { get; set; } = false;
-        /// <summary>自動バン対象チャンピオンID</summary>
+        /// <summary>自動バン対象チャンピオンID（レーン別）</summary>
         //public int? AutoBanChampionId { get; set; }
         public int? AutoBanChampionIdTop { get; set; }
         public int? AutoBanChampionIdJungle { get; set; }
         public int? AutoBanChampionIdMid { get; set; }
         public int? AutoBanChampionIdAdc { get; set; }
         public int? AutoBanChampionIdSupport { get; set; }
+        /// <summary>自動ピック機能の有効/無効</summary>
+        public bool AutoPickEnabled { get; set; } = false;
+        /// <summary>自動ピック対象チャンピオンID（レーン別）</summary>
+        public int? AutoPickChampionIdTop { get; set; }
+        public int? SubPickChampionIdTop { get; set; }
+        public int? AutoPickChampionIdJungle { get; set; }
+        public int? SubPickChampionIdJungle { get; set; }
+        public int? AutoPickChampionIdMid { get; set; }
+        public int? SubPickChampionIdMid { get; set; }
+        public int? AutoPickChampionIdAdc { get; set; }
+        public int? SubPickChampionIdAdc { get; set; }
+        public int? AutoPickChampionIdSupport { get; set; }
+        public int? SubPickChampionIdSupport { get; set; }
 
         /// <summary>
         /// 設定ファイル保存ディレクトリのパスを取得します。

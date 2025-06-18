@@ -127,6 +127,11 @@ public static class AutoAccepter
                     await AutoBanner.RunAsync(client, baseUrl, config, ct);
                 }
 
+                if (config.AutoPickEnabled)
+                {
+                    await AutoPicker.RunAsync(client, baseUrl, config, ct);
+                }
+
                 await Task.Delay(1000, ct);
             }
             catch (HttpRequestException ex)

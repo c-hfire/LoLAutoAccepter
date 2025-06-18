@@ -71,7 +71,7 @@ namespace LoL_AutoAccept
 
             Logger.Write("LoL Auto Accepter ‹N“®Š®—¹");
 
-            if (isAutoAcceptEnabled || config.AutoBanEnabled)
+            if (isAutoAcceptEnabled || config.AutoBanEnabled || config.AutoPickEnabled)
                 StartWatcher();
 
             _ = FetchAndSaveChampionDataAsync();
@@ -135,7 +135,7 @@ namespace LoL_AutoAccept
             _ = FetchAndSaveChampionDataAsync();
             UpdateNotifyIcon();
             StopWatcher();
-            if (isAutoAcceptEnabled || config.AutoBanEnabled)
+            if (isAutoAcceptEnabled || config.AutoBanEnabled || config.AutoPickEnabled)
                 StartWatcher();
         }
 

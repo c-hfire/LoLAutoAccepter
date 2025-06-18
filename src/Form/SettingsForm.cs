@@ -31,6 +31,7 @@ namespace LoL_AutoAccept
             checkBoxAutoClose.Checked = _config.AutoCloseOnAccept;
             checkBoxDiscordRpc.Checked = _config.DiscordRpcEnabled;
             checkBoxAutoBan.Checked = _config.AutoBanEnabled;
+            checkBoxAutoPick.Checked = _config.AutoPickEnabled;
             LoadChampionListToComboBoxes();
         }
 
@@ -46,12 +47,25 @@ namespace LoL_AutoAccept
             _config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
             _config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
             _config.AutoBanEnabled = checkBoxAutoBan.Checked;
+            _config.AutoPickEnabled = checkBoxAutoPick.Checked;
 
             _config.AutoBanChampionIdTop = GetSelectedChampionId(comboBoxAutoBanTop);
             _config.AutoBanChampionIdJungle = GetSelectedChampionId(comboBoxAutoBanJungle);
             _config.AutoBanChampionIdMid = GetSelectedChampionId(comboBoxAutoBanMid);
             _config.AutoBanChampionIdAdc = GetSelectedChampionId(comboBoxAutoBanAdc);
             _config.AutoBanChampionIdSupport = GetSelectedChampionId(comboBoxAutoBanSupport);
+
+            _config.AutoPickChampionIdTop = GetSelectedChampionId(comboBoxAutoPickTop);
+            _config.AutoPickChampionIdJungle = GetSelectedChampionId(comboBoxAutoPickJungle);
+            _config.AutoPickChampionIdMid = GetSelectedChampionId(comboBoxAutoPickMid);
+            _config.AutoPickChampionIdAdc = GetSelectedChampionId(comboBoxAutoPickAdc);
+            _config.AutoPickChampionIdSupport = GetSelectedChampionId(comboBoxAutoPickSupport);
+
+            _config.SubPickChampionIdTop = GetSelectedChampionId(comboBoxSubPickTop);
+            _config.SubPickChampionIdJungle = GetSelectedChampionId(comboBoxSubPickJungle);
+            _config.SubPickChampionIdMid = GetSelectedChampionId(comboBoxSubPickMid);
+            _config.SubPickChampionIdAdc = GetSelectedChampionId(comboBoxSubPickAdc);
+            _config.SubPickChampionIdSupport = GetSelectedChampionId(comboBoxSubPickSupport);
 
             _config.Save();
         }
@@ -152,6 +166,18 @@ namespace LoL_AutoAccept
                 SetChampionComboBox(comboBoxAutoBanMid, dataSource, _config.AutoBanChampionIdMid);
                 SetChampionComboBox(comboBoxAutoBanAdc, dataSource, _config.AutoBanChampionIdAdc);
                 SetChampionComboBox(comboBoxAutoBanSupport, dataSource, _config.AutoBanChampionIdSupport);
+
+                SetChampionComboBox(comboBoxAutoPickTop, dataSource, _config.AutoPickChampionIdTop);
+                SetChampionComboBox(comboBoxAutoPickJungle, dataSource, _config.AutoPickChampionIdJungle);
+                SetChampionComboBox(comboBoxAutoPickMid, dataSource, _config.AutoPickChampionIdMid);
+                SetChampionComboBox(comboBoxAutoPickAdc, dataSource, _config.AutoPickChampionIdAdc);
+                SetChampionComboBox(comboBoxAutoPickSupport, dataSource, _config.AutoPickChampionIdSupport);
+
+                SetChampionComboBox(comboBoxSubPickTop, dataSource, _config.SubPickChampionIdTop);
+                SetChampionComboBox(comboBoxSubPickJungle, dataSource, _config.SubPickChampionIdJungle);
+                SetChampionComboBox(comboBoxSubPickMid, dataSource, _config.SubPickChampionIdMid);
+                SetChampionComboBox(comboBoxSubPickAdc, dataSource, _config.SubPickChampionIdAdc);
+                SetChampionComboBox(comboBoxSubPickSupport, dataSource, _config.SubPickChampionIdSupport);
             }
             catch (Exception ex)
             {
