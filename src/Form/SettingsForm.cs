@@ -9,26 +9,20 @@ namespace LoL_AutoAccept
     /// </summary>
     public partial class SettingsForm : Form
     {
-        // 命名規則統一: フィールド名を _config に
         private readonly AppConfig _config;
+        private List<ChampionItem> _championList = [];
 
-        private List<(string Key, string Name)> _championList = new();
-
-        /// <summary>
-        /// 設定フォームを初期化します。
-        /// </summary>
-        /// <param name="config">アプリケーション設定</param>
         public SettingsForm(AppConfig config)
         {
             InitializeComponent();
             _config = config;
-            LoadSettings();
+            LoadSettingsToUI();
         }
 
         /// <summary>
         /// UIに設定値をロードします。
         /// </summary>
-        private void LoadSettings()
+        private void LoadSettingsToUI()
         {
             checkBoxAutoAccept.Checked = _config.AutoAcceptEnabled;
             numericUpDownDelay.Value = _config.AcceptDelaySeconds;
@@ -37,13 +31,13 @@ namespace LoL_AutoAccept
             checkBoxAutoClose.Checked = _config.AutoCloseOnAccept;
             checkBoxDiscordRpc.Checked = _config.DiscordRpcEnabled;
             checkBoxAutoBan.Checked = _config.AutoBanEnabled;
-            LoadChampionList();
+            LoadChampionListToComboBoxes();
         }
 
         /// <summary>
         /// UIの値を設定に保存します。
         /// </summary>
-        private void SaveSettings()
+        private void SaveUIToSettings()
         {
             _config.AutoAcceptEnabled = checkBoxAutoAccept.Checked;
             _config.AcceptDelaySeconds = (int)numericUpDownDelay.Value;
@@ -52,25 +46,28 @@ namespace LoL_AutoAccept
             _config.AutoCloseOnAccept = checkBoxAutoClose.Checked;
             _config.DiscordRpcEnabled = checkBoxDiscordRpc.Checked;
             _config.AutoBanEnabled = checkBoxAutoBan.Checked;
-            // NameからIDを取得して保存
-            var selectedName = comboBoxAutoBanChampion.SelectedItem as string;
-            var champ = _championList.FirstOrDefault(x => x.Name == selectedName);
-            _config.AutoBanChampionId = int.TryParse(champ.Key, out var id) ? id : (int?)null;
+
+            _config.AutoBanChampionIdTop = GetSelectedChampionId(comboBoxAutoBanTop);
+            _config.AutoBanChampionIdJungle = GetSelectedChampionId(comboBoxAutoBanJungle);
+            _config.AutoBanChampionIdMid = GetSelectedChampionId(comboBoxAutoBanMid);
+            _config.AutoBanChampionIdAdc = GetSelectedChampionId(comboBoxAutoBanAdc);
+            _config.AutoBanChampionIdSupport = GetSelectedChampionId(comboBoxAutoBanSupport);
+
             _config.Save();
         }
 
         /// <summary>
-        /// 設定フォルダのパスを取得します。
+        /// 指定したComboBoxから選択されたChampionIdを取得します。
         /// </summary>
+        private static int? GetSelectedChampionId(ComboBox comboBox)
+            => comboBox.SelectedItem is ChampionItem item && item.Id != 0 ? item.Id : null;
+
         private static string ConfigFolderPath =>
             Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "LAA");
 
-        /// <summary>
-        /// OKボタンクリック時の処理
-        /// </summary>
         private void ButtonOK_Click(object sender, EventArgs e)
         {
-            SaveSettings();
+            SaveUIToSettings();
 
             StartupManager.SetStartupEnabled(
                 _config.StartWithWindows,
@@ -82,18 +79,12 @@ namespace LoL_AutoAccept
             Close();
         }
 
-        /// <summary>
-        /// キャンセルボタンクリック時の処理
-        /// </summary>
         private void ButtonCancel_Click(object sender, EventArgs e)
         {
             DialogResult = DialogResult.Cancel;
             Close();
         }
 
-        /// <summary>
-        /// フォルダ選択ダイアログを表示します。
-        /// </summary>
         private void ButtonBrowse_Click(object sender, EventArgs e)
         {
             using var folderBrowserDialog = new FolderBrowserDialog
@@ -106,9 +97,6 @@ namespace LoL_AutoAccept
             }
         }
 
-        /// <summary>
-        /// 設定フォルダを開きます。
-        /// </summary>
         private void ButtonOpenConfigFolder_Click(object sender, EventArgs e)
         {
             try
@@ -129,9 +117,9 @@ namespace LoL_AutoAccept
         }
 
         /// <summary>
-        /// チャンピオンリストをロードします。
+        /// チャンピオンリストをロードし、各レーンのComboBoxにセットします。
         /// </summary>
-        private void LoadChampionList()
+        private void LoadChampionListToComboBoxes()
         {
             try
             {
@@ -140,41 +128,54 @@ namespace LoL_AutoAccept
                     "LAA",
                     "champion_list.json"
                 );
-                if (File.Exists(path))
-                {
-                    var json = File.ReadAllText(path);
-                    var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
-                    if (list != null)
+                if (!File.Exists(path)) return;
+
+                var json = File.ReadAllText(path);
+                var list = JsonSerializer.Deserialize<List<Dictionary<string, string>>>(json);
+                if (list == null) return;
+
+                _championList = [.. list
+                    .Where(x => x.ContainsKey("key") && x.ContainsKey("name"))
+                    .Select(x => new ChampionItem
                     {
-                        _championList = [.. list
-                            .Where(x => x.ContainsKey("key") && x.ContainsKey("name"))
-                            .Select(x => (x["key"], x["name"]))
-                            .OrderBy(x => x.Item2)];
+                        Id = int.Parse(x["key"]),
+                        Name = x["name"]
+                    })
+                    .OrderBy(x => x.Name)];
 
-                        comboBoxAutoBanChampion.Items.Clear();
-                        comboBoxAutoBanChampion.Items.Add(""); // 空選択
-                        comboBoxAutoBanChampion.Items.AddRange(_championList.Select(x => x.Name).ToArray());
+                var empty = new ChampionItem { Id = 0, Name = "" };
+                var dataSource = new List<ChampionItem> { empty };
+                dataSource.AddRange(_championList);
 
-                        // ここでIDから名前を逆引きして選択
-                        if (_config.AutoBanChampionId.HasValue)
-                        {
-                            var champ = _championList.FirstOrDefault(x => int.Parse(x.Key) == _config.AutoBanChampionId.Value);
-                            if (!string.IsNullOrEmpty(champ.Name))
-                                comboBoxAutoBanChampion.SelectedItem = champ.Name;
-                            else
-                                comboBoxAutoBanChampion.SelectedItem = "";
-                        }
-                        else
-                        {
-                            comboBoxAutoBanChampion.SelectedItem = "";
-                        }
-                    }
-                }
+                SetChampionComboBox(comboBoxAutoBanTop, dataSource, _config.AutoBanChampionIdTop);
+                SetChampionComboBox(comboBoxAutoBanJungle, dataSource, _config.AutoBanChampionIdJungle);
+                SetChampionComboBox(comboBoxAutoBanMid, dataSource, _config.AutoBanChampionIdMid);
+                SetChampionComboBox(comboBoxAutoBanAdc, dataSource, _config.AutoBanChampionIdAdc);
+                SetChampionComboBox(comboBoxAutoBanSupport, dataSource, _config.AutoBanChampionIdSupport);
             }
             catch (Exception ex)
             {
                 Logger.Write("チャンピオンリスト読込失敗: " + ex.Message);
             }
         }
+
+        /// <summary>
+        /// 指定したComboBoxにチャンピオンリストをセットし、選択値を反映します。
+        /// </summary>
+        private static void SetChampionComboBox(ComboBox comboBox, List<ChampionItem> dataSource, int? selectedId)
+        {
+            comboBox.DataSource = new List<ChampionItem>(dataSource);
+            comboBox.DisplayMember = "Name";
+            comboBox.ValueMember = "Id";
+            comboBox.SelectedValue = selectedId ?? 0;
+        }
     }
+
+    public class ChampionItem
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public override string ToString() => Name;
+    }
+
 }

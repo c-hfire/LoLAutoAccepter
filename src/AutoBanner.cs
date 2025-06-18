@@ -12,7 +12,7 @@ public static class AutoBanner
     /// </summary>
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
-        if (!config.AutoBanEnabled || !config.AutoBanChampionId.HasValue) return;
+        if (!config.AutoBanEnabled) return;
 
         try
         {
@@ -23,18 +23,30 @@ public static class AutoBanner
 
             if (IsCustomGame(doc.RootElement)) return;
 
-            var bannedChampionIds = GetBannedChampionIds(doc.RootElement);
-            if (bannedChampionIds.Contains(config.AutoBanChampionId.Value))
+            var lane = GetLocalPlayerLane(doc.RootElement);
+            if (lane is null) return;
+
+            int? banId = lane switch
             {
-                return;
-            }
+                "TOP" => config.AutoBanChampionIdTop,
+                "JUNGLE" => config.AutoBanChampionIdJungle,
+                "MIDDLE" or "MID" => config.AutoBanChampionIdMid,
+                "BOTTOM" or "ADC" => config.AutoBanChampionIdAdc,
+                "UTILITY" or "SUPPORT" => config.AutoBanChampionIdSupport,
+                _ => null
+            };
+
+            if (!banId.HasValue) return;
+
+            var bannedChampionIds = GetBannedChampionIds(doc.RootElement);
+            if (bannedChampionIds.Contains(banId.Value)) return;
 
             if (!doc.RootElement.TryGetProperty("actions", out var actionsArray)) return;
 
             var banAction = FindBanAction(actionsArray, GetLocalCellId(doc.RootElement));
             if (banAction is null) return;
 
-            await ExecuteBanAsync(client, baseUrl, banAction.Value, config.AutoBanChampionId.Value, ct);
+            await ExecuteBanAsync(client, baseUrl, banAction.Value, banId.Value, ct);
         }
         catch (Exception ex)
         {
@@ -42,6 +54,9 @@ public static class AutoBanner
         }
     }
 
+    /// <summary>
+    /// セッション情報のJSONを取得します。
+    /// </summary>
     private static async Task<string?> GetSessionJsonAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
         try
@@ -57,11 +72,17 @@ public static class AutoBanner
         }
     }
 
+    /// <summary>
+    /// カスタムゲームかどうかを判定します。
+    /// </summary>
     private static bool IsCustomGame(JsonElement root)
     {
         return root.TryGetProperty("isCustomGame", out var isCustomGameProp) && isCustomGameProp.GetBoolean();
     }
 
+    /// <summary>
+    /// 指定したセルIDのバンアクションを検索します。
+    /// </summary>
     private static JsonElement? FindBanAction(JsonElement actionsArray, int localCellId)
     {
         foreach (var actionGroup in actionsArray.EnumerateArray())
@@ -79,6 +100,9 @@ public static class AutoBanner
         return null;
     }
 
+    /// <summary>
+    /// バンアクションを実行します。
+    /// </summary>
     private static async Task ExecuteBanAsync(HttpClient client, string baseUrl, JsonElement action, int championId, CancellationToken ct)
     {
         try
@@ -141,7 +165,8 @@ public static class AutoBanner
         }
         return null;
     }
-    /// </summary>
+
+    /// <summary>
     /// すでにバンされているチャンピオンID一覧を取得
     /// </summary>
     private static HashSet<int> GetBannedChampionIds(JsonElement root)
@@ -159,5 +184,26 @@ public static class AutoBanner
                     banned.Add(ban.GetInt32());
         }
         return banned;
+    }
+
+    /// <summary>
+    /// ローカルプレイヤーのレーンを取得します。
+    /// </summary>
+    private static string? GetLocalPlayerLane(JsonElement sessionRoot)
+    {
+        if (!sessionRoot.TryGetProperty("myTeam", out var myTeam) ||
+            !sessionRoot.TryGetProperty("localPlayerCellId", out var cellIdProp))
+            return null;
+
+        int localCellId = cellIdProp.GetInt32();
+        foreach (var player in myTeam.EnumerateArray())
+        {
+            if (player.TryGetProperty("cellId", out var cellId) && cellId.GetInt32() == localCellId)
+            {
+                if (player.TryGetProperty("assignedPosition", out var laneProp))
+                    return laneProp.GetString();
+            }
+        }
+        return null;
     }
 }

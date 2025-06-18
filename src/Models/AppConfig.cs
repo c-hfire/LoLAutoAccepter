@@ -20,7 +20,12 @@ namespace LoLAutoAccepter.Models
         /// <summary>自動バン機能の有効/無効</summary>
         public bool AutoBanEnabled { get; set; } = false;
         /// <summary>自動バン対象チャンピオンID</summary>
-        public int? AutoBanChampionId { get; set; }
+        //public int? AutoBanChampionId { get; set; }
+        public int? AutoBanChampionIdTop { get; set; }
+        public int? AutoBanChampionIdJungle { get; set; }
+        public int? AutoBanChampionIdMid { get; set; }
+        public int? AutoBanChampionIdAdc { get; set; }
+        public int? AutoBanChampionIdSupport { get; set; }
 
         /// <summary>
         /// 設定ファイル保存ディレクトリのパスを取得します。
