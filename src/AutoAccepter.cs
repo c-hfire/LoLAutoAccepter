@@ -23,7 +23,6 @@ public static class AutoAccepter
             using var client = LcuApiClient.Create(auth);
 
             Logger.Write($"接続成功: {baseUrl}");
-            await LogSummonerNameAsync(client, baseUrl, ct);
 
             if (!await WaitForApiReadyAsync(client, baseUrl, ct)) return;
 
@@ -35,6 +34,13 @@ public static class AutoAccepter
         }
     }
 
+    /// <summary>
+    /// lockfile の内容を解析し、ベースURLと認証情報を取得します。
+    /// </summary>
+    /// <param name="lockfileContent">lockfile の内容</param>
+    /// <param name="baseUrl">APIのベースURL（出力）</param>
+    /// <param name="auth">認証情報（出力）</param>
+    /// <returns>解析に成功した場合は true</returns>
     private static bool TryParseLockfile(string lockfileContent, out string baseUrl, out string auth)
     {
         if (!LockfileParser.TryParse(lockfileContent, out baseUrl, out auth))
@@ -57,26 +63,40 @@ public static class AutoAccepter
         for (int i = 0; i < 60; i++)
         {
             if (ct.IsCancellationRequested) return false;
-            try
+            if (await IsApiReadyAsync(client, baseUrl, ct))
             {
-                var res = await client.GetAsync($"{baseUrl}/lol-platform-config/v1/namespaces", ct);
-                if (res.IsSuccessStatusCode)
-                {
-                    Logger.Write("内部APIが起動しました。セッションを開始します。");
-                    return true;
-                }
-            }
-            catch (HttpRequestException ex)
-            {
-                Logger.Write($"API起動待ち中の接続エラー: {ex.Message}");
-            }
-            catch (TaskCanceledException)
-            {
-                return false;
+                Logger.Write("内部APIが起動しました。セッションを開始します。");
+                await LogSummonerNameAsync(client, baseUrl, ct);
+                return true;
             }
             await Task.Delay(500, ct);
         }
         Logger.Write("内部APIが30秒以内に起動しませんでした。");
+        return false;
+    }
+
+    /// <summary>
+    /// 内部APIが利用可能かどうかを確認します。
+    /// </summary>
+    /// <param name="client">HttpClient</param>
+    /// <param name="baseUrl">APIのベースURL</param>
+    /// <param name="ct">キャンセルトークン</param>
+    /// <returns>利用可能な場合は true</returns>
+    private static async Task<bool> IsApiReadyAsync(HttpClient client, string baseUrl, CancellationToken ct)
+    {
+        try
+        {
+            var res = await client.GetAsync($"{baseUrl}/lol-platform-config/v1/namespaces", ct);
+            return res.IsSuccessStatusCode;
+        }
+        catch (HttpRequestException ex)
+        {
+            Logger.Write($"API起動待ち中の接続エラー: {ex.Message}");
+        }
+        catch (TaskCanceledException)
+        {
+            // handled by caller
+        }
         return false;
     }
 
@@ -94,21 +114,12 @@ public static class AutoAccepter
         {
             try
             {
-                if (await TryAcceptMatchAsync(client, baseUrl, config, ct))
+                accepted = await TryAcceptMatchAsync(client, baseUrl, config, ct) || accepted;
+
+                if (accepted && config.AutoCloseOnAccept)
                 {
-                    if (!accepted)
-                    {
-                        accepted = true;
-                        if (config.AutoCloseOnAccept)
-                        {
-                            Logger.Write("設定によりアプリを自動終了します。");
-                            Application.Exit();
-                        }
-                    }
-                }
-                else
-                {
-                    accepted = false;
+                    Logger.Write("設定によりアプリを自動終了します。");
+                    Application.Exit();
                 }
 
                 if (config.AutoBanEnabled)
@@ -144,25 +155,57 @@ public static class AutoAccepter
     /// <returns>マッチが承諾された場合は true</returns>
     private static async Task<bool> TryAcceptMatchAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
-        var response = await client.GetAsync($"{baseUrl}/lol-matchmaking/v1/ready-check", ct);
-        if (!response.IsSuccessStatusCode)
-        {
-            return false;
-        }
+        var state = await GetReadyCheckStateAsync(client, baseUrl, ct);
+        if (state == null) return false;
 
-        string responseText = await response.Content.ReadAsStringAsync();
-        if (responseText.Contains("InProgress"))
+        if (state == "Accepted")
         {
-            if (config.AutoAcceptEnabled)
+            return true;
+        }
+        if (state == "InProgress" && config.AutoAcceptEnabled)
+        {
+            //Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
+            await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
+
+            // 再度状態を確認してから送信
+            var checkState = await GetReadyCheckStateAsync(client, baseUrl, ct);
+            if (checkState == "InProgress")
             {
-                Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
-                await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
                 await client.PostAsync($"{baseUrl}/lol-matchmaking/v1/ready-check/accept", null, ct);
                 Logger.Write("マッチ承諾を送信しました。");
                 return true;
             }
         }
         return false;
+    }
+
+    /// <summary>
+    /// ready-check の state を取得します。
+    /// </summary>
+    /// <param name="client">HttpClient</param>
+    /// <param name="baseUrl">APIのベースURL</param>
+    /// <param name="ct">キャンセルトークン</param>
+    /// <returns>state 文字列（取得失敗時は null）</returns>
+    private static async Task<string?> GetReadyCheckStateAsync(HttpClient client, string baseUrl, CancellationToken ct)
+    {
+        try
+        {
+            var response = await client.GetAsync($"{baseUrl}/lol-matchmaking/v1/ready-check", ct);
+            if (!response.IsSuccessStatusCode) return null;
+
+            string responseText = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(responseText);
+            var root = doc.RootElement;
+            if (root.TryGetProperty("state", out var stateProp))
+            {
+                return stateProp.GetString();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.Write($"ready-check状態取得失敗: {ex.Message}");
+        }
+        return null;
     }
 
     /// <summary>

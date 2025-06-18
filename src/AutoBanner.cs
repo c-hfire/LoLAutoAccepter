@@ -28,11 +28,11 @@ public static class AutoBanner
 
             int? banId = lane switch
             {
-                "TOP" => config.AutoBanChampionIdTop,
-                "JUNGLE" => config.AutoBanChampionIdJungle,
-                "MIDDLE" or "MID" => config.AutoBanChampionIdMid,
-                "BOTTOM" or "ADC" => config.AutoBanChampionIdAdc,
-                "UTILITY" or "SUPPORT" => config.AutoBanChampionIdSupport,
+                "top" => config.AutoBanChampionIdTop,
+                "jungle" => config.AutoBanChampionIdJungle,
+                "middle" => config.AutoBanChampionIdMid,
+                "bottom" => config.AutoBanChampionIdAdc,
+                "utility" => config.AutoBanChampionIdSupport,
                 _ => null
             };
 

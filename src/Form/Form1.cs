@@ -44,7 +44,7 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 現在のバージョン
         /// </summary>
-        private const string CurrentVersion = "1.0.4";
+        private const string CurrentVersion = "1.0.5";
 
         /// <summary>
         /// フォームのコンストラクタ
@@ -336,7 +336,7 @@ namespace LoL_AutoAccept
                 };
                 var json = JsonSerializer.Serialize(champList, options);
                 await File.WriteAllTextAsync(savePath, json);
-                Logger.Write("Data Dragon保存成功");
+                //Logger.Write("Data Dragon保存成功");
             }
             catch (Exception ex)
             {
