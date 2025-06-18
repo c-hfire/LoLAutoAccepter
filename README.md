@@ -8,7 +8,8 @@ League of Legends（LoL） / Teamfight Tactics（TFT） のマッチメイキン
 ## 🧩 主な機能
 
 - マッチング時の自動承諾（遅延秒数の指定可）
-- ドラフトピック時の自動バン（チャンピオン指定可）
+- ドラフトピック時の自動ピック
+- ドラフトピック時の自動バン
 - タスクトレイメニューからON/OFF切り替え
 - Windows起動時に自動起動（設定可）
 - 承諾後にアプリ自動終了（設定可）
@@ -22,7 +23,7 @@ League of Legends（LoL） / Teamfight Tactics（TFT） のマッチメイキン
 
 1. [リリースページ](https://github.com/c-hfire/LoLAutoAccepter/releases/latest/download/LoLAutoAccepter.exe) から `LoLAutoAccepter.exe` をダウンロード
 2. インストール不要、ダブルクリックで起動
-3. タスクトレイアイコンから「自動承諾」や「自動バン」などの設定をONにしてご利用ください
+3. タスクトレイアイコンから「自動承諾」などの設定をONにしてご利用ください
 4. 詳細設定やチャンピオン指定は「設定」メニューから行えます
 
 ---
@@ -31,6 +32,7 @@ League of Legends（LoL） / Teamfight Tactics（TFT） のマッチメイキン
 
 - **自動承諾の有効/無効**
 - **承諾までの遅延秒数**（0～10秒）
+- **自動ピックの有効/無効・チャンピオン指定**
 - **自動バンの有効/無効・チャンピオン指定**
 - **Windows起動時に自動起動**
 - **承諾後にアプリ自動終了**
@@ -51,7 +53,7 @@ League of Legends（LoL） / Teamfight Tactics（TFT） のマッチメイキン
 
 - .NET 8 / C# 12.0
 - Windows 10/11対応
-- MITライセンス
+- MITLICENSE
 
 ---
 
