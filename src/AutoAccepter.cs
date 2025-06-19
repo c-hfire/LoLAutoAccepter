@@ -110,8 +110,17 @@ public static class AutoAccepter
     private static async Task MonitorAndAcceptAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
         bool accepted = false;
+        string lockfilePath = Path.Combine(config.LeagueOfLegendsDirectory, "lockfile");
+
         while (!ct.IsCancellationRequested)
         {
+            // lockfileが消えていたらループ終了
+            if (!File.Exists(lockfilePath))
+            {
+                Logger.Write("lockfileが削除されたため、セッションを終了します。");
+                break;
+            }
+
             try
             {
                 accepted = await TryAcceptMatchAsync(client, baseUrl, config, ct) || accepted;
