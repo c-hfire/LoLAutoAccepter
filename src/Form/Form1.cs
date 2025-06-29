@@ -44,7 +44,7 @@ namespace LoL_AutoAccept
         /// <summary>
         /// 現在のバージョン
         /// </summary>
-        private const string CurrentVersion = "1.0.5";
+        private const string CurrentVersion = "1.0.6";
 
         /// <summary>
         /// フォームのコンストラクタ
