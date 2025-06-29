@@ -18,9 +18,8 @@ namespace LoLAutoAccepter.Utilities
                 if (!res.IsSuccessStatusCode) return null;
                 return await res.Content.ReadAsStringAsync(ct);
             }
-            catch (Exception ex)
+            catch
             {
-                Logger.Write($"セッション取得エラー: {ex.Message}");
                 return null;
             }
         }

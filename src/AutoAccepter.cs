@@ -71,7 +71,6 @@ public static class AutoAccepter
             }
             await Task.Delay(500, ct);
         }
-        Logger.Write("内部APIが30秒以内に起動しませんでした。");
         return false;
     }
 
@@ -215,9 +214,8 @@ public static class AutoAccepter
                 return stateProp.GetString();
             }
         }
-        catch (Exception ex)
+        catch
         {
-            Logger.Write($"ready-check状態取得失敗: {ex.Message}");
         }
         return null;
     }
