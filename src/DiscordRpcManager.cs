@@ -8,15 +8,18 @@ public static class DiscordRpcManager
     /// <summary>
     /// Discord RPC クライアントのインスタンス
     /// </summary>
-    private static DiscordRpcClient client = null!;
+    private static DiscordRpcClient? client;
 
     /// <summary>
     /// Discord RPC を初期化します。
     /// </summary>
     public static void Initialize()
     {
-        client = new DiscordRpcClient("1381577693862039562");
-        client.Initialize();
+        if (client == null)
+        {
+            client = new DiscordRpcClient("1381577693862039562");
+            client.Initialize();
+        }
     }
 
     /// <summary>
@@ -24,6 +27,7 @@ public static class DiscordRpcManager
     /// </summary>
     public static void SetPresence()
     {
+        if (client == null) return;
         client.SetPresence(new RichPresence()
         {
             Buttons =
@@ -42,6 +46,8 @@ public static class DiscordRpcManager
     /// </summary>
     public static void Shutdown()
     {
+        if (client == null) return;
         client.Dispose();
+        client = null;
     }
 }
