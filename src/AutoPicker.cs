@@ -21,6 +21,10 @@ public static class AutoPicker
 
             using var doc = JsonDocument.Parse(sessionJson);
 
+#if DEBUG
+            int? mainPickId = config.AutoPickChampionIdJungle;
+            int? subPickId = config.SubPickChampionIdJungle;
+#else
             if (ChampSelectUtils.IsCustomGame(doc.RootElement)) return;
 
             var lane = ChampSelectUtils.GetLocalPlayerLane(doc.RootElement);
@@ -44,6 +48,7 @@ public static class AutoPicker
                 "utility" => config.SubPickChampionIdSupport,
                 _ => null
             };
+#endif
 
             if (!mainPickId.HasValue && !subPickId.HasValue) return;
 
