@@ -2,6 +2,7 @@
 using LoLAutoAccepter.Services;
 using LoLAutoAccepter.Utilities;
 using System.Text;
+using System.IO;
 
 /// <summary>
 /// lockfile の監視とセッション管理を行うクラス
@@ -33,13 +34,29 @@ public class LockfileWatcher
     /// </summary>
     public void Start()
     {
-        fsWatcher = new FileSystemWatcher(Path.GetDirectoryName(LockfilePath)!);
-        fsWatcher.Filter = "lockfile";
-        fsWatcher.NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.Size;
-        fsWatcher.Changed += OnLockfileChanged;
-        fsWatcher.Created += OnLockfileChanged;
-        fsWatcher.EnableRaisingEvents = true;
-        TryStartSession();
+        var dir = Path.GetDirectoryName(LockfilePath);
+        if (string.IsNullOrEmpty(dir) || !Directory.Exists(dir))
+        {
+            Logger.Write($"設定されたディレクトリが存在しません: {config.LeagueOfLegendsDirectory}。lockfile 監視を開始できません。設定を確認してください。");
+            return;
+        }
+
+        try
+        {
+            fsWatcher = new FileSystemWatcher(dir)
+            {
+                Filter = "lockfile",
+                NotifyFilter = NotifyFilters.LastWrite | NotifyFilters.CreationTime | NotifyFilters.Size,
+                EnableRaisingEvents = true
+            };
+            fsWatcher.Changed += OnLockfileChanged;
+            fsWatcher.Created += OnLockfileChanged;
+            TryStartSession();
+        }
+        catch (Exception ex)
+        {
+            Logger.Write($"FileSystemWatcher の初期化に失敗しました: {ex.Message}");
+        }
     }
 
     /// <summary>
