@@ -3,17 +3,16 @@ using LoLAutoAccepter.Services;
 using LoLAutoAccepter.Utilities;
 using System.Text;
 using System.IO;
+using System.Threading.Tasks;
 
-/// <summary>
-/// lockfile の監視とセッション管理を行うクラス
-/// </summary>
-public class LockfileWatcher
+public class LockfileWatcher : IDisposable
 {
     private readonly AppConfig config;
     private CancellationTokenSource? sessionCts;
     private Task? sessionTask;
     private FileSystemWatcher? fsWatcher;
     private string? lastLockfileContent;
+    private readonly object sessionLock = new();
 
     /// <summary>
     /// lockfile のパスを取得します。
@@ -51,6 +50,7 @@ public class LockfileWatcher
             };
             fsWatcher.Changed += OnLockfileChanged;
             fsWatcher.Created += OnLockfileChanged;
+            fsWatcher.Error += OnWatcherError;
             TryStartSession();
         }
         catch (Exception ex)
@@ -64,12 +64,7 @@ public class LockfileWatcher
     /// </summary>
     public void Stop()
     {
-        fsWatcher?.Dispose();
-        fsWatcher = null;
-
-        sessionCts?.Cancel();
-        sessionCts = null;
-        sessionTask = null;
+        Dispose();
     }
 
     /// <summary>
@@ -79,7 +74,18 @@ public class LockfileWatcher
     /// <param name="e">イベント引数</param>
     private void OnLockfileChanged(object? sender, FileSystemEventArgs e)
     {
-        TryStartSession();
+        // 短時間に何度も来るので軽いデバウンス（簡易）
+        Task.Delay(50).ContinueWith(_ => TryStartSession(), TaskScheduler.Default);
+    }
+
+    /// <summary>
+    /// FileSystemWatcher エラー時の処理
+    /// </summary>
+    /// <param name="sender">イベント送信元</param>
+    /// <param name="e">イベント引数</param>
+    private void OnWatcherError(object? sender, ErrorEventArgs e)
+    {
+        Logger.Write($"FileSystemWatcher エラー: {e.GetException()?.Message}");
     }
 
     /// <summary>
@@ -106,11 +112,23 @@ public class LockfileWatcher
 
         lastLockfileContent = content;
 
-        sessionCts?.Cancel();
-        sessionCts = new CancellationTokenSource();
+        lock (sessionLock)
+        {
+            sessionCts?.Cancel();
+            sessionCts = new CancellationTokenSource();
 
-        Logger.Write("新しいlockfileを検出。セッション開始中…");
-        sessionTask = AutoAccepter.RunSessionAsync(sessionCts.Token, config, content);
+            Logger.Write("新しいlockfileを検出。セッション開始中…");
+
+            // 例外を確実にログするために ContinueWith を付ける
+            sessionTask = AutoAccepter.RunSessionAsync(sessionCts.Token, config, content);
+            sessionTask.ContinueWith(t =>
+            {
+                if (t.IsFaulted)
+                {
+                    Logger.Write($"セッションで例外発生: {t.Exception?.GetBaseException().Message}");
+                }
+            }, TaskScheduler.Default);
+        }
     }
 
     /// <summary>
@@ -120,16 +138,49 @@ public class LockfileWatcher
     /// <returns>内容文字列またはnull</returns>
     private static string? ReadLockfileContent(string path)
     {
-        try
+        // 競合回避のため短いリトライを行う
+        const int maxAttempts = 3;
+        for (int i = 0; i < maxAttempts; i++)
         {
-            using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            using var reader = new StreamReader(fs, Encoding.UTF8);
-            return reader.ReadToEnd();
+            try
+            {
+                using var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+                using var reader = new StreamReader(fs, Encoding.UTF8);
+                var text = reader.ReadToEnd();
+                return string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+            }
+            catch
+            {
+                // 少し待って再試行
+                Thread.Sleep(30);
+            }
         }
-        catch
+        return null;
+    }
+
+    /// <summary>
+    /// リソースを解放します。
+    /// </summary>
+    public void Dispose()
+    {
+        fsWatcher?.Dispose();
+        fsWatcher = null;
+
+        lock (sessionLock)
         {
-            // 読み込み失敗時はnullを返す
-            return null;
+            sessionCts?.Cancel();
+            sessionCts = null;
+
+            if (sessionTask != null && !sessionTask.IsCompleted)
+            {
+                // 非同期で完了を監視し、完了時の例外をログする
+                sessionTask.ContinueWith(t =>
+                {
+                    if (t.IsFaulted)
+                        Logger.Write($"セッション終了時に例外: {t.Exception?.GetBaseException().Message}");
+                }, TaskScheduler.Default);
+            }
+            sessionTask = null;
         }
     }
 }
