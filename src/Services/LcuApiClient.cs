@@ -2,16 +2,10 @@ using System.Net.Http.Headers;
 
 namespace LoLAutoAccepter.Services
 {
-    /// <summary>
-    /// LCU API への接続用 HttpClient を生成するユーティリティクラス
-    /// </summary>
+    /// <summary>LCU API 接続用の HttpClient を生成するユーティリティ</summary>
     public static class LcuApiClient
     {
-        /// <summary>
-        /// 認証情報付きの HttpClient を作成します。
-        /// </summary>
-        /// <param name="auth">認証情報</param>
-        /// <returns>HttpClient インスタンス</returns>
+        /// <summary>Basic 認証を設定した HttpClient を作成します（自己署名証明書を許可します）</summary>
         public static HttpClient Create(string auth)
         {
             var handler = new HttpClientHandler

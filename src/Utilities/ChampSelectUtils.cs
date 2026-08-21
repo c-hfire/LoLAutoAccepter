@@ -8,7 +8,7 @@ namespace LoLAutoAccepter.Utilities
     public static class ChampSelectUtils
     {
         /// <summary>
-        /// セッション情報のJSONを取得します。
+        /// セッション情報の JSON を取得する
         /// </summary>
         public static async Task<string?> GetSessionJsonAsync(HttpClient client, string baseUrl, CancellationToken ct)
         {
@@ -25,7 +25,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// カスタムゲームかどうかを判定します。
+        /// カスタムゲームかどうかを判定する
         /// </summary>
         public static bool IsCustomGame(JsonElement root)
         {
@@ -33,7 +33,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// ローカルプレイヤーのセルIDを取得します。
+        /// ローカルプレイヤーのセルIDを取得する
         /// </summary>
         public static int GetLocalCellId(JsonElement sessionRoot)
         {
@@ -43,7 +43,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// チャンピオンIDからチャンピオン名を取得します。
+        /// チャンピオンIDからチャンピオン名を取得する
         /// </summary>
         public static string? GetChampionNameById(int? id)
         {
@@ -77,8 +77,8 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// すでにバンされているチャンピオンID一覧を取得
-        /// </summary>  
+        /// 既にバンされているチャンピオンID一覧を取得する
+        /// </summary>
         public static HashSet<int> GetBannedChampionIds(JsonElement root)
         {
             var banned = new HashSet<int>();
@@ -116,7 +116,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// すでにピックされているチャンピオンID一覧を取得
+        /// 既にピックされているチャンピオンID一覧を取得する
         /// </summary>
         public static HashSet<int> GetPickedChampionIds(JsonElement root)
         {
@@ -149,7 +149,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// ローカルプレイヤーのレーンを取得します。
+        /// ローカルプレイヤーのレーンを取得する
         /// </summary>
         public static string? GetLocalPlayerLane(JsonElement sessionRoot)
         {
@@ -170,7 +170,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// 指定したセルIDとアクションタイプのアクションを検索します。
+        /// 指定したセルIDとアクションタイプのアクションを検索する
         /// </summary>
         public static JsonElement? FindActionByType(JsonElement actionsArray, int localCellId, string actionType)
         {
@@ -213,7 +213,7 @@ namespace LoLAutoAccepter.Utilities
             }
             catch (Exception ex)
             {
-                Logger.Write($"{logPrefix}実行エラー: {ex.Message}");
+                Logger.Write($"{logPrefix} 実行エラー: {ex.Message}");
             }
         }
     }

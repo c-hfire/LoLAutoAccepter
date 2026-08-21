@@ -1,17 +1,11 @@
 namespace LoLAutoAccepter.Services
 {
-    /// <summary>
-    /// lockfile の解析を行うユーティリティクラス
-    /// </summary>
+    /// <summary>LCU の lockfile を解析するユーティリティ</summary>
     public static class LockfileParser
     {
         /// <summary>
-        /// lockfile の内容を解析し、APIのベースURLと認証情報を取得します。
+        /// lockfile の内容から LCU の base URL と Basic 認証文字列を取得します。解析に失敗した場合は false を返します。
         /// </summary>
-        /// <param name="lockfileContent">lockfile の内容</param>
-        /// <param name="baseUrl">APIのベースURL</param>
-        /// <param name="auth">認証情報</param>
-        /// <returns>解析に成功した場合は true</returns>
         public static bool TryParse(string lockfileContent, out string baseUrl, out string auth)
         {
             baseUrl = string.Empty;

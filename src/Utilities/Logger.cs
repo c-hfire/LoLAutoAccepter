@@ -5,7 +5,7 @@ using System.Text;
 namespace LoLAutoAccepter.Utilities
 {
     /// <summary>
-    /// アプリケーションのログ出力を行う静的クラス
+    /// ログ出力を行う静的クラス
     /// </summary>
     public static class Logger
     {
@@ -14,13 +14,11 @@ namespace LoLAutoAccepter.Utilities
         private static readonly string LogFilePath =
             Path.Combine(LogDirectory, "log.txt");
         private static readonly object writeLock = new();
-
-        private const long MaxLogFileBytes = 5 * 1024 * 1024; // 5MB
+        private const long MaxLogFileBytes = 5 * 1024 * 1024;
 
         /// <summary>
-        /// 指定したメッセージをログに記録します。
+        /// メッセージをログファイルに追記する
         /// </summary>
-        /// <param name="message">出力するメッセージ</param>
         public static void Write(string message)
         {
             try
@@ -35,13 +33,12 @@ namespace LoLAutoAccepter.Utilities
             }
             catch
             {
-                // ログ出力失敗時は最小限に抑える（必要なら Debug 出力）
                 try { System.Diagnostics.Debug.WriteLine(message); } catch { }
             }
         }
 
         /// <summary>
-        /// ログディレクトリが存在しない場合は作成します。
+        /// ログディレクトリが存在しない場合は作成する
         /// </summary>
         private static void EnsureLogDirectory()
         {
@@ -52,7 +49,7 @@ namespace LoLAutoAccepter.Utilities
         }
 
         /// <summary>
-        /// ログファイルのサイズが閾値を超えた場合にバックアップファイルを作成します。
+        /// ログファイルサイズが閾値を超えたらバックアップを作成する
         /// </summary>
         private static void RotateIfNeeded()
         {
@@ -70,7 +67,6 @@ namespace LoLAutoAccepter.Utilities
             }
             catch
             {
-                // ローテーション失敗は無視（ロギング自体を阻害したくない）
             }
         }
     }

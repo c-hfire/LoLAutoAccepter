@@ -1,8 +1,10 @@
 ﻿using LoLAutoAccepter.Models;
 using LoLAutoAccepter.Services;
 using LoLAutoAccepter.Utilities;
+using System;
 using System.Text;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 
 public class LockfileWatcher : IDisposable
@@ -15,21 +17,25 @@ public class LockfileWatcher : IDisposable
     private readonly object sessionLock = new();
 
     /// <summary>
-    /// lockfile のパスを取得します。
+    /// 最後に lockfile が見つからないログを出した時刻（抑制用）
+    /// </summary>
+    private DateTime lastNoLockfileLog = DateTime.MinValue;
+
+    /// <summary>
+    /// lockfile のパスを取得する
     /// </summary>
     private string LockfilePath => Path.Combine(config.LeagueOfLegendsDirectory, "lockfile");
 
     /// <summary>
-    /// LockfileWatcher の新しいインスタンスを初期化します。
+    /// インスタンスを初期化する
     /// </summary>
-    /// <param name="config">アプリ設定</param>
     public LockfileWatcher(AppConfig config)
     {
         this.config = config;
     }
 
     /// <summary>
-    /// lockfile監視を開始します。
+    /// lockfile の監視を開始する
     /// </summary>
     public void Start()
     {
@@ -60,7 +66,7 @@ public class LockfileWatcher : IDisposable
     }
 
     /// <summary>
-    /// lockfile監視を停止します。
+    /// 監視を停止してリソースを解放する
     /// </summary>
     public void Stop()
     {
@@ -68,34 +74,33 @@ public class LockfileWatcher : IDisposable
     }
 
     /// <summary>
-    /// lockfile変更時の処理
+    /// lockfile 変更時にデバウンスしてセッション開始を試みる
     /// </summary>
-    /// <param name="sender">イベント送信元</param>
-    /// <param name="e">イベント引数</param>
     private void OnLockfileChanged(object? sender, FileSystemEventArgs e)
     {
-        // 短時間に何度も来るので軽いデバウンス（簡易）
-        Task.Delay(50).ContinueWith(_ => TryStartSession(), TaskScheduler.Default);
+        Task.Delay(300).ContinueWith(_ => TryStartSession(), TaskScheduler.Default);
     }
 
     /// <summary>
-    /// FileSystemWatcher エラー時の処理
+    /// FileSystemWatcher のエラーをログに出す
     /// </summary>
-    /// <param name="sender">イベント送信元</param>
-    /// <param name="e">イベント引数</param>
     private void OnWatcherError(object? sender, ErrorEventArgs e)
     {
         Logger.Write($"FileSystemWatcher エラー: {e.GetException()?.Message}");
     }
 
     /// <summary>
-    /// セッション開始を試みます。
+    /// セッション開始を試みる
     /// </summary>
     private void TryStartSession()
     {
         if (!File.Exists(LockfilePath))
         {
-            Logger.Write("lockfileが存在しません。セッション開始中止。");
+            if ((DateTime.Now - lastNoLockfileLog) > TimeSpan.FromSeconds(10))
+            {
+                Logger.Write("lockfileが存在しません。セッション開始中止。");
+                lastNoLockfileLog = DateTime.Now;
+            }
             return;
         }
 
@@ -103,7 +108,6 @@ public class LockfileWatcher : IDisposable
         if (content == null || content == lastLockfileContent)
             return;
 
-        // lockfile の内容が有効かどうかチェック
         if (!LockfileParser.TryParse(content, out _, out _))
         {
             Logger.Write("lockfile の内容が不正です。セッション開始中止。");
@@ -119,7 +123,6 @@ public class LockfileWatcher : IDisposable
 
             Logger.Write("新しいlockfileを検出。セッション開始中…");
 
-            // 例外を確実にログするために ContinueWith を付ける
             sessionTask = AutoAccepter.RunSessionAsync(sessionCts.Token, config, content);
             sessionTask.ContinueWith(t =>
             {
@@ -132,13 +135,10 @@ public class LockfileWatcher : IDisposable
     }
 
     /// <summary>
-    /// lockfileの内容を読み取ります。
+    /// lockfile の内容を安全に読み取る（短いリトライあり）
     /// </summary>
-    /// <param name="path">lockfileのパス</param>
-    /// <returns>内容文字列またはnull</returns>
     private static string? ReadLockfileContent(string path)
     {
-        // 競合回避のため短いリトライを行う
         const int maxAttempts = 3;
         for (int i = 0; i < maxAttempts; i++)
         {
@@ -151,7 +151,6 @@ public class LockfileWatcher : IDisposable
             }
             catch
             {
-                // 少し待って再試行
                 Thread.Sleep(30);
             }
         }
@@ -159,7 +158,7 @@ public class LockfileWatcher : IDisposable
     }
 
     /// <summary>
-    /// リソースを解放します。
+    /// リソースを解放する
     /// </summary>
     public void Dispose()
     {
@@ -173,7 +172,6 @@ public class LockfileWatcher : IDisposable
 
             if (sessionTask != null && !sessionTask.IsCompleted)
             {
-                // 非同期で完了を監視し、完了時の例外をログする
                 sessionTask.ContinueWith(t =>
                 {
                     if (t.IsFaulted)

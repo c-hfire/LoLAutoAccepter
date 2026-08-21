@@ -3,12 +3,12 @@ using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
 /// <summary>
-/// ドラフトピック時の自動ピック処理を行うクラス
+/// チャンピオン自動選択を行う機能
 /// </summary>
 public static class AutoPicker
 {
     /// <summary>
-    /// 指定された設定に従い自動ピックを実行します。
+    /// 対象セッションで自動ピックを試行する
     /// </summary>
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
@@ -78,7 +78,7 @@ public static class AutoPicker
         }
         catch (Exception ex)
         {
-            Logger.Write($"AutoPickerエラー: {ex}");
+            Logger.Write($"AutoPicker 例外: {ex.Message}");
         }
     }
 }

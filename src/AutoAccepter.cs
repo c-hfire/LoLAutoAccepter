@@ -4,16 +4,13 @@ using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
 /// <summary>
-/// マッチングの自動承諾処理を行うクラス
+/// マッチングの自動承諾を行うクラス
 /// </summary>
 public static class AutoAccepter
 {
     /// <summary>
-    /// セッションを開始し、マッチングを自動で承諾します。
+    /// セッションを開始し自動承諾を実行する
     /// </summary>
-    /// <param name="ct">キャンセルトークン</param>
-    /// <param name="config">アプリ設定</param>
-    /// <param name="lockfileContent">lockfile の内容</param>
     public static async Task RunSessionAsync(CancellationToken ct, AppConfig config, string lockfileContent)
     {
         try
@@ -35,12 +32,8 @@ public static class AutoAccepter
     }
 
     /// <summary>
-    /// lockfile の内容を解析し、ベースURLと認証情報を取得します。
+    /// lockfile を解析してベース URL と認証情報を取得する
     /// </summary>
-    /// <param name="lockfileContent">lockfile の内容</param>
-    /// <param name="baseUrl">APIのベースURL（出力）</param>
-    /// <param name="auth">認証情報（出力）</param>
-    /// <returns>解析に成功した場合は true</returns>
     private static bool TryParseLockfile(string lockfileContent, out string baseUrl, out string auth)
     {
         if (!LockfileParser.TryParse(lockfileContent, out baseUrl, out auth))
@@ -52,12 +45,8 @@ public static class AutoAccepter
     }
 
     /// <summary>
-    /// 内部APIが起動するまで待機します。
+    /// 内部APIが利用可能になるまで待機する
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="ct">キャンセルトークン</param>
-    /// <returns>APIが起動した場合は true</returns>
     private static async Task<bool> WaitForApiReadyAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
         for (int i = 0; i < 60; i++)
@@ -71,16 +60,14 @@ public static class AutoAccepter
             }
             await Task.Delay(500, ct);
         }
+
+        Logger.Write("内部APIの起動待ちがタイムアウトしました。セッションを終了します。");
         return false;
     }
 
     /// <summary>
-    /// 内部APIが利用可能かどうかを確認します。
+    /// 内部APIの稼働を確認する
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="ct">キャンセルトークン</param>
-    /// <returns>利用可能な場合は true</returns>
     private static async Task<bool> IsApiReadyAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
         try
@@ -88,24 +75,18 @@ public static class AutoAccepter
             var res = await client.GetAsync($"{baseUrl}/lol-platform-config/v1/namespaces", ct);
             return res.IsSuccessStatusCode;
         }
-        catch (HttpRequestException ex)
+        catch (HttpRequestException)
         {
-            Logger.Write($"API起動待ち中の接続エラー: {ex.Message}");
         }
         catch (TaskCanceledException)
         {
-            // handled by caller
         }
         return false;
     }
 
     /// <summary>
-    /// マッチング状態を監視し、必要に応じて自動承諾を行います。
+    /// マッチングを監視し、必要に応じて承諾や自動処理を実行する
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="config">アプリ設定</param>
-    /// <param name="ct">キャンセルトークン</param>
     private static async Task MonitorAndAcceptAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
         bool accepted = false;
@@ -113,7 +94,6 @@ public static class AutoAccepter
 
         while (!ct.IsCancellationRequested)
         {
-            // lockfileが消えていたらループ終了
             if (!File.Exists(lockfilePath))
             {
                 Logger.Write("lockfileが削除されたため、セッションを終了します。");
@@ -159,13 +139,8 @@ public static class AutoAccepter
     }
 
     /// <summary>
-    /// マッチング検出と承諾処理を行います。
+    /// マッチング検出時に承諾を試みる（成功なら true）
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="config">アプリ設定</param>
-    /// <param name="ct">キャンセルトークン</param>
-    /// <returns>マッチが承諾された場合は true</returns>
     private static async Task<bool> TryAcceptMatchAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
         var state = await GetReadyCheckStateAsync(client, baseUrl, ct);
@@ -177,10 +152,8 @@ public static class AutoAccepter
         }
         if (state == "InProgress" && config.AutoAcceptEnabled)
         {
-            //Logger.Write($"マッチング検出。{config.AcceptDelaySeconds}秒後に承諾します。");
             await Task.Delay(config.AcceptDelaySeconds * 1000, ct);
 
-            // 再度状態を確認してから送信
             var checkState = await GetReadyCheckStateAsync(client, baseUrl, ct);
             if (checkState == "InProgress")
             {
@@ -193,12 +166,8 @@ public static class AutoAccepter
     }
 
     /// <summary>
-    /// ready-check の state を取得します。
+    /// ready-check の state を取得する
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="ct">キャンセルトークン</param>
-    /// <returns>state 文字列（取得失敗時は null）</returns>
     private static async Task<string?> GetReadyCheckStateAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
         try
@@ -221,48 +190,61 @@ public static class AutoAccepter
     }
 
     /// <summary>
-    /// サモナー名をログに出力します。
+    /// サモナー名をログに出力する（最大3回試行）
     /// </summary>
-    /// <param name="client">HttpClient</param>
-    /// <param name="baseUrl">APIのベースURL</param>
-    /// <param name="ct">キャンセルトークン</param>
     private static async Task LogSummonerNameAsync(HttpClient client, string baseUrl, CancellationToken ct)
     {
-        try
+        const int maxAttempts = 3;
+        for (int attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            var summonerRes = await client.GetAsync($"{baseUrl}/lol-summoner/v1/current-summoner", ct);
-            if (!summonerRes.IsSuccessStatusCode)
+            try
             {
-                Logger.Write($"アカウント名取得失敗: {summonerRes.StatusCode}");
-                return;
-            }
-
-            var json = await summonerRes.Content.ReadAsStringAsync(ct);
-            using var doc = JsonDocument.Parse(json);
-            var root = doc.RootElement;
-
-            if (root.TryGetProperty("gameName", out var gameNameProp) &&
-                root.TryGetProperty("tagLine", out var tagLineProp))
-            {
-                var gameName = gameNameProp.GetString();
-                var tagLine = tagLineProp.GetString();
-                if (!string.IsNullOrEmpty(gameName) && !string.IsNullOrEmpty(tagLine))
+                var summonerRes = await client.GetAsync($"{baseUrl}/lol-summoner/v1/current-summoner", ct);
+                if (!summonerRes.IsSuccessStatusCode)
                 {
-                    Logger.Write($"ログイン中のアカウント名: {gameName}#{tagLine}");
+                    if (attempt == maxAttempts)
+                    {
+                        Logger.Write($"アカウント名取得失敗: {summonerRes.StatusCode}");
+                    }
+                    await Task.Delay(500, ct);
+                    continue;
                 }
-                else
+
+                var json = await summonerRes.Content.ReadAsStringAsync(ct);
+                using var doc = JsonDocument.Parse(json);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("gameName", out var gameNameProp) &&
+                    root.TryGetProperty("tagLine", out var tagLineProp))
+                {
+                    var gameName = gameNameProp.GetString();
+                    var tagLine = tagLineProp.GetString();
+                    if (!string.IsNullOrEmpty(gameName) && !string.IsNullOrEmpty(tagLine))
+                    {
+                        Logger.Write($"ログイン中のアカウント名: {gameName}#{tagLine}");
+                        return;
+                    }
+                }
+
+                if (attempt == maxAttempts)
                 {
                     Logger.Write("アカウント名が取得できませんでした。");
                 }
+                else
+                {
+                    await Task.Delay(500, ct);
+                }
             }
-            else
+            catch (TaskCanceledException)
             {
-                Logger.Write("アカウント名が取得できませんでした。");
+                return;
             }
-        }
-        catch (Exception ex)
-        {
-            Logger.Write($"アカウント名取得失敗: {ex.Message}");
+            catch (Exception ex)
+            {
+                if (attempt == maxAttempts)
+                    Logger.Write($"アカウント名取得時に例外: {ex.Message}");
+                await Task.Delay(500, ct);
+            }
         }
     }
 }

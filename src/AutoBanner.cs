@@ -3,12 +3,12 @@ using LoLAutoAccepter.Utilities;
 using System.Text.Json;
 
 /// <summary>
-/// ドラフトピック時の自動バン処理を行うクラス
+/// 自動バン処理を行う機能
 /// </summary>
 public static class AutoBanner
 {
     /// <summary>
-    /// 指定された設定に従い自動バンを実行します。
+    /// 対象セッションで自動バンを試行する
     /// </summary>
     public static async Task RunAsync(HttpClient client, string baseUrl, AppConfig config, CancellationToken ct)
     {
@@ -50,7 +50,7 @@ public static class AutoBanner
         }
         catch (Exception ex)
         {
-            Logger.Write($"AutoBannerエラー: {ex}");
+            Logger.Write($"AutoBanner 例外: {ex.Message}");
         }
     }
 }

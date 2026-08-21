@@ -1,70 +1,155 @@
-﻿# 🎮 LoL Auto Accepter
+﻿# LoL Auto Accepter
 
-League of Legends（LoL） / Teamfight Tactics（TFT） のマッチメイキング画面で自動的に「承諾」ボタンを押してくれる、タスクトレイ常駐型のWindowsツールです。  
-ドラフトピック時の自動バンや、細かな自動化設定も可能です。
+League of Legends / Teamfight Tactics のマッチメイキング画面で自動的にマッチを承諾してくれる Windows デスクトップアプリです。タスクトレイに常駐し、マッチング検出時に自動で「承諾」を押下します。
 
----
+さらに、チャンピオンセレクト画面での自動バン・自動ピック、Discord Rich Presence 対応など、ゲームプレイをサポートする機能を備えています。
 
-## 🧩 主な機能
+## 主な機能
 
-- マッチング時の自動承諾（遅延秒数の指定可）
-- ドラフトピック時の自動ピック
-- ドラフトピック時の自動バン
-- タスクトレイメニューからON/OFF切り替え
-- Windows起動時に自動起動（設定可）
-- 承諾後にアプリ自動終了（設定可）
-- Discord Rich Presence対応（設定可）
-- 設定・ログ・チャンピオンリストの保存
-- アップデート自動チェック
+- **自動承諾**: マッチング検出時に自動でマッチを承諾（遅延秒数を設定可能）
+- **自動バン**: チャンピオンセレクト時にロール別に指定したチャンピオンを自動バン
+- **自動ピック**: チャンピオンセレクト時にロール別に指定したチャンピオンを自動ピック（サブピック設定も対応）
+- **タスクトレイ常駐**: ウィンドウを最小化してタスクトレイで動作
+- **Windows 起動時に自動起動**: レジストリを利用したスタートアップ登録
+- **マッチ承諾後に自動終了**: 設定により、マッチ承諾後に自動でアプリを終了
+- **Discord Rich Presence**: Discord ステータスにアプリの情報を表示
+- **自動更新チェック**: GitHub Releases API を利用した更新チェック
+- **ログ出力**: アプリの動作をログファイルに記録
 
----
+## インストール・使い方
 
-## 🔽 ダウンロードと使い方
+### 1. ダウンロード
 
-1. [リリースページ](https://github.com/c-hfire/LoLAutoAccepter/releases/latest/download/LoLAutoAccepter.exe) から `LoLAutoAccepter.exe` をダウンロード
-2. インストール不要、ダブルクリックで起動
-3. タスクトレイアイコンから「自動承諾」などの設定をONにしてご利用ください
-4. 詳細設定やチャンピオン指定は「設定」メニューから行えます
+[GitHub Releases](https://github.com/c-hfire/LoLAutoAccepter/releases/latest) から `LoLAutoAccepter.exe` をダウンロードしてください。インストール不要です。
 
----
+### 2. 起動
 
-## ⚙️ 主な設定項目
+ダウンロードした `LoLAutoAccepter.exe` をダブルクリックして起動します。初回起動時に設定ダイアログが自動で開きます。
 
-- **自動承諾の有効/無効**
-- **承諾までの遅延秒数**（0～10秒）
-- **自動ピックの有効/無効・チャンピオン指定**
-- **自動バンの有効/無効・チャンピオン指定**
-- **Windows起動時に自動起動**
-- **承諾後にアプリ自動終了**
-- **Discord Rich Presenceの有効/無効**
-- **League of Legendsのインストールディレクトリ指定**
+### 3. 初期設定
 
----
+設定ダイアログで以下を確認してください：
 
-## 📝 注意事項
+- **League of Legends のインストールディレクトリ**: デフォルトは `C:\Riot Games\League of Legends` です。インストール先が異なる場合は変更してください。
+- **自動承諾**: デフォルトで有効です。不要な場合は無効化してください。
 
-- 本ツールはRiot Games, Inc.非公式です。利用は自己責任でお願いします。
-- ゲームクライアントのアップデート等で動作しなくなる場合があります。
-- セキュリティソフトによっては警告が出る場合がありますが、ソースコードは公開されています。
+### 4. 機能の有効化
 
----
+タスクトレイアイコン（トレイ常駐時）またはタスクトレイメニューから各機能を有効化・無効化できます：
 
-## 💻 開発・ライセンス
+- **自動承諾**: マッチング時のマッチ承諾を自動化
+- **設定**: 詳細な設定を開く
 
-- .NET 8 / C# 12.0
-- Windows 10/11対応
-- MITLICENSE
+### 5. 利用開始
 
----
+League of Legends クライアントを起動してマッチメイキングに進むと、アプリが自動で反応します。
 
-## 🙏 クレジット
+## 設定項目
 
-- [Riot Games, Inc.](https://www.riotgames.com/)  
-- [Data Dragon](https://developer.riotgames.com/docs/lol#data-dragon)  
-- [Discord Rich Presence](https://discord.com/developers/docs/rich-presence/how-to)
+### 基本設定
 
----
+| 設定項目 | 説明 | デフォルト |
+|---------|------|----------|
+| 自動承諾 | マッチメイキング時の自動承諾を有効化 | 有効 |
+| 承諾遅延（秒） | マッチング検出から承諾までの遅延（0〜10秒） | 0秒 |
+| Windows 起動時に自動起動 | PC 起動時にアプリを自動起動 | 有効 |
+| マッチ承諾後に自動終了 | マッチ承諾成功後、自動でアプリを終了 | 無効 |
 
-## 📮 問い合わせ・バグ報告
+### チャンピオンセレクト関連
 
-バグ報告・要望は[GitHub Issues](https://github.com/c-hfire/LoLAutoAccepter/issues)までお願いします。
+| 設定項目 | 説明 |
+|---------|------|
+| 自動バン | チャンピオンセレクト時の自動バンを有効化 |
+| ロール別バン対象 | Top、Jungle、Mid、ADC、Support の各ロール用バン対象チャンピオン |
+| 自動ピック | チャンピオンセレクト時の自動ピックを有効化 |
+| ロール別ピック対象 | Top、Jungle、Mid、ADC、Support の各ロール用ピック対象チャンピオン |
+| ロール別サブピック対象 | ピック対象がバン・ピック済みの場合のサブ対象チャンピオン |
+
+### その他の設定
+
+| 設定項目 | 説明 | デフォルト |
+|---------|------|----------|
+| Discord Rich Presence | Discord ステータスに情報を表示 | 有効 |
+| League of Legends インストールディレクトリ | LoL クライアントのインストール先 | `C:\Riot Games\League of Legends` |
+
+## 動作環境
+
+- **OS**: Windows 10 / Windows 11
+- **.NET Runtime**: .NET 8.0（ランタイムのインストール不要、exe に含まれます）
+- **League of Legends**: クライアントがインストール済みであること
+
+## トラブルシューティング
+
+### League of Legends を認識できない
+
+インストールディレクトリが異なる場合、設定ダイアログから正しいパスを指定してください。デフォルトは `C:\Riot Games\League of Legends` です。
+
+### 自動承諾が動作しない
+
+- アプリが League of Legends クライアントと同じネットワークで通信できることを確認してください。
+- lockfile が削除された場合、セッションは終了します。
+- ゲームクライアントのアップデート後に動作が変わる場合があります。
+
+### Windows Defender など、セキュリティソフトで警告される
+
+本アプリはオープンソースで、ソースコードは GitHub で公開されています。セキュリティ上の問題がないかご自身で確認してください。
+
+### Discord Rich Presence が表示されない
+
+Discord が起動していることを確認してください。設定で Discord Rich Presence が有効になっているか確認してください。
+
+## 注意事項
+
+- 本ツールは Riot Games, Inc. の公式ツールではありません。自己責任でご利用ください。
+- League of Legends クライアントのアップデートに伴い、動作しなくなる場合があります。
+- 本アプリはゲーム規約に違反しないことを想定していますが、利用は自己責任です。
+
+## ログ
+
+アプリの動作ログは以下の場所に保存されます：
+
+%APPDATA%\LAA\log.txt
+
+
+## 開発・ビルド
+
+### 必要な環境
+
+- Visual Studio 2022 以上（または Visual Studio Code）
+- .NET 8.0 SDK
+- C# 12.0 対応のコンパイラ
+
+### 必要なパッケージ
+
+NuGet パッケージ：
+- DiscordRichPresence 1.3.0.28
+
+### ビルド方法
+
+dotnet build
+
+### リリースビルド
+
+dotnet publish -c Release -o ./bin/Release
+
+
+### 開発に使用しているツール
+
+- 一部の開発・実装には AI を活用しています。
+
+## ライセンス
+
+MIT License
+
+詳細は [LICENSE.txt](LICENSE.txt) をご覧ください。
+
+## クレジット・外部サービス
+
+- **Riot Games, Inc.** – League of Legends 開発元
+- **Data Dragon** – チャンピオン情報取得元（Riot Games 公式）
+- **Discord Rich Presence** – Discord ステータス表示機能
+- **GitHub Releases API** – アップデート確認機能
+
+## 問い合わせ・バグ報告
+
+バグ報告・機能要望は [GitHub Issues](https://github.com/c-hfire/LoLAutoAccepter/issues) でお知らせください。

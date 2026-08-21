@@ -1,17 +1,17 @@
 using DiscordRPC;
 
 /// <summary>
-/// Discord Rich Presence の管理を行う静的クラス
+/// Discord Rich Presence の管理
 /// </summary>
 public static class DiscordRpcManager
 {
     /// <summary>
-    /// Discord RPC クライアントのインスタンス
+    /// Discord RPC クライアント
     /// </summary>
     private static DiscordRpcClient? client;
 
     /// <summary>
-    /// Discord RPC を初期化します。
+    /// Discord RPC を初期化する
     /// </summary>
     public static void Initialize()
     {
@@ -23,26 +23,26 @@ public static class DiscordRpcManager
     }
 
     /// <summary>
-    /// Discord のプレゼンス情報を設定します。
+    /// プレゼンスを設定する
     /// </summary>
     public static void SetPresence()
     {
         if (client == null) return;
         client.SetPresence(new RichPresence()
         {
-            Buttons =
-            [
+            Buttons = new[]
+            {
                 new DiscordRPC.Button
                 {
-                    Label = "アプリを入手",
+                    Label = "最新リリースを確認",
                     Url = "https://github.com/c-hfire/LoLAutoAccepter/releases/latest"
                 }
-            ]
+            }
         });
     }
 
     /// <summary>
-    /// Discord RPC をシャットダウンします。
+    /// Discord RPC をシャットダウンする
     /// </summary>
     public static void Shutdown()
     {
